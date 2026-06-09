@@ -78,8 +78,8 @@
   .dot-fab{background:var(--blue);}.dot-aym{background:var(--orange);}
   .arrow-box{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-top:12px;font-size:13px;line-height:1.6;}
   .arrow-box strong{color:var(--accent);}
-  .arrow-box-big{background:var(--surface);border:2px solid var(--accent);border-radius:10px;padding:14px;margin-top:12px;font-size:15px;font-weight:700;line-height:1.6;text-align:center;}
-  .arrow-box-big strong{color:var(--accent);font-size:18px;}
+  .arrow-box-big{background:var(--surface);border:2px solid var(--accent);border-radius:10px;padding:14px;margin-top:8px;font-size:15px;font-weight:700;line-height:1.6;text-align:center;}
+  .arrow-box-big strong{color:var(--accent);font-size:17px;}
   .progress-bar-bg{height:5px;background:var(--border);border-radius:99px;margin-top:10px;overflow:hidden;}
   .progress-bar{height:100%;border-radius:99px;background:var(--green);}
   .progress-bar.over{background:var(--red);}
@@ -88,12 +88,12 @@
   .empty-state .icon{font-size:36px;margin-bottom:10px;}
   .sub-label{font-size:11px;color:var(--muted);margin-top:4px;}
   .especes-badge{font-size:11px;font-weight:800;color:var(--accent);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px;padding:4px 0;}
+  .solde-badge{font-size:11px;font-weight:800;color:var(--green);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;}
   .virement-row{display:flex;align-items:center;gap:10px;margin-top:12px;padding:10px 12px;background:var(--surface);border-radius:10px;border:1px solid var(--border);cursor:pointer;}
   .virement-row input[type="checkbox"]{width:20px;height:20px;cursor:pointer;accent-color:var(--green);flex-shrink:0;}
   .virement-row span{font-size:13px;font-weight:600;}
   .virement-row.done{border-color:var(--green);background:rgba(76,175,125,0.1);}
   .virement-row.done span{color:var(--green);}
-  .solde-badge{font-size:11px;font-weight:800;color:var(--green);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;}
 </style>
 </head>
 <body>
@@ -204,7 +204,6 @@ var BIN_ID = '6a21d867da38895dfe888684';
 var API_KEY = '$2a$10$NRRQdixtQ/NsijZcDxQ47OYwm3YGBJXnv56wrj6SZJOokRbWEhRa6';
 var API_URL = 'https://api.jsonbin.io/v3/b/' + BIN_ID;
 var URSSAF_TAUX = 0.24;
-
 var chantiers = [];
 var editIndex = null;
 var newResp = null;
@@ -217,7 +216,6 @@ function fmt(n) {
   return Number(n).toLocaleString('fr-FR', {minimumFractionDigits:2,maximumFractionDigits:2}) + ' euros';
 }
 function today() { return new Date().toISOString().split('T')[0]; }
-
 function setStatus(msg, cls) {
   var el = document.getElementById('sync-status');
   el.textContent = msg;
@@ -233,9 +231,7 @@ function chargerDonnees() {
       setStatus('Synchronise', 'sync-ok');
       renderListe();
     })
-    .catch(function(){
-      setStatus('Erreur de connexion', 'sync-error');
-    });
+    .catch(function(){ setStatus('Erreur de connexion', 'sync-error'); });
 }
 
 function sauverEnLigne() {
@@ -290,25 +286,21 @@ function setResp(who) {
   document.getElementById('btn-resp-aym').className = 'toggle-btn'+(who==='Aymeric'?' sel-aym':'');
   document.getElementById('resp-hint').textContent = who+' encaisse le devis et paie les charges';
 }
-
 function setEditResp(who) {
   editResp = who;
   document.getElementById('edit-btn-fab').className = 'toggle-btn'+(who==='Fabrice'?' sel-fab':'');
   document.getElementById('edit-btn-aym').className = 'toggle-btn'+(who==='Aymeric'?' sel-aym':'');
 }
-
 function setDeclare(val) {
   newDeclare = val;
   document.getElementById('btn-declare-oui').className = 'toggle-btn'+(val?' sel-green':'');
   document.getElementById('btn-declare-non').className = 'toggle-btn'+(!val?' sel-aym':'');
 }
-
 function setEditDeclare(val) {
   editDeclare = val;
   document.getElementById('edit-btn-declare-oui').className = 'toggle-btn'+(val?' sel-green':'');
   document.getElementById('edit-btn-declare-non').className = 'toggle-btn'+(!val?' sel-aym':'');
 }
-
 function setWho(who) {
   depWho = who;
   document.getElementById('who-btn-fab').className = 'who-btn'+(who==='Fabrice'?' sel-fab':'');
@@ -391,12 +383,10 @@ function ouvrirModal(i) {
   document.getElementById('modal-overlay').classList.add('open');
   document.getElementById('modal-overlay').scrollTop=0;
 }
-
 function fermerModal() {
   document.getElementById('modal-overlay').classList.remove('open');
   editIndex=null;
 }
-
 function renderDepensesModal() {
   var list=document.getElementById('edit-depenses-list');
   var dep=(chantiers[editIndex]&&chantiers[editIndex].depenses)||[];
@@ -410,7 +400,6 @@ function renderDepensesModal() {
     '</div>';
   }).join('');
 }
-
 function ajouterDepense() {
   var desc=document.getElementById('dep-desc').value.trim()||'Depense';
   var mnt=parseFloat(document.getElementById('dep-mnt').value);
@@ -426,12 +415,10 @@ function ajouterDepense() {
     renderDepensesModal();
   });
 }
-
 function supprimerDepense(i) {
   chantiers[editIndex].depenses.splice(i,1);
   sauverEnLigne().then(function(){renderDepensesModal();});
 }
-
 function sauvegarderChantier() {
   var client=document.getElementById('edit-client').value.trim();
   var devis=parseFloat(document.getElementById('edit-devis').value);
@@ -442,7 +429,6 @@ function sauvegarderChantier() {
   chantiers[editIndex].declare=editDeclare;
   sauverEnLigne().then(function(){fermerModal();renderListe();});
 }
-
 function supprimerChantier() {
   if(!confirm('Supprimer ce chantier ?'))return;
   chantiers.splice(editIndex,1);
@@ -454,24 +440,30 @@ function renderBilan() {
   if(!chantiers.length){container.innerHTML='<div class="empty-state"><div class="icon">📊</div>Aucune donnee.</div>';return;}
 
   var tDevis=0,tUrssaf=0,tDepFab=0,tDepAym=0,tFab=0,tAym=0;
-  var tFabNonSolde=0,tAymNonSolde=0;
+  var soldeNonVire = 0;
 
   var rows=chantiers.map(function(c,i){
     var r=calcChantier(c);
     tDevis+=r.devis; tUrssaf+=r.urssaf; tDepFab+=r.depFab; tDepAym+=r.depAym;
     tFab+=r.recoit_fab; tAym+=r.recoit_aym;
-    if(!c.virement){
-      tFabNonSolde+=r.recoit_fab;
-      tAymNonSolde+=r.recoit_aym;
+
+    if(!c.virement) {
+      if(r.transfert.de === 'Aymeric' && r.transfert.a === 'Fabrice') {
+        soldeNonVire += r.transfert.mnt;
+      } else {
+        soldeNonVire -= r.transfert.mnt;
+      }
     }
+
     var chipClass=c.responsable==='Fabrice'?'chip-fab':'chip-aym';
     var urssafLabel=c.declare!==false?'URSSAF 24%':'EN ESPECES';
     var urssafVal=c.declare!==false?('-'+fmt(r.urssaf)):'<span style="color:var(--accent);font-weight:800">EN ESPECES</span>';
-    var virementClass = c.virement ? 'virement-row done' : 'virement-row';
-    var virementLabel = c.virement ? '✅ Virement effectue - Solde' : 'Virement effectue ?';
+    var virClass = c.virement?'virement-row done':'virement-row';
+    var virLabel = c.virement?'Virement effectue':'Virement effectue ?';
+
     return '<div class="card'+(c.virement?' solde':'')+'">' +
       (c.declare===false?'<div class="especes-badge">EN ESPECES</div>':'') +
-      (c.virement?'<div class="solde-badge">✅ SOLDE</div>':'') +
+      (c.virement?'<div class="solde-badge">SOLDE</div>':'') +
       '<div class="card-header">' +
         '<div><div class="client-name">'+c.client+'</div><div class="tag-date">'+(c.date||'')+'</div></div>' +
         '<div class="chip '+chipClass+'">'+c.responsable+'</div>' +
@@ -484,32 +476,30 @@ function renderBilan() {
       '<div class="person-row"><div class="person-label"><div class="dot dot-fab"></div>Fabrice recoit</div><span class="mono blue">'+fmt(r.recoit_fab)+'</span></div>' +
       '<div class="person-row"><div class="person-label"><div class="dot dot-aym"></div>Aymeric recoit</div><span class="mono orange">'+fmt(r.recoit_aym)+'</span></div>' +
       '<div class="arrow-box"><strong>'+r.transfert.de+'</strong> verse <strong>'+fmt(r.transfert.mnt)+'</strong> a '+r.transfert.a+'</div>' +
-      '<div class="'+virementClass+'" onclick="toggleVirement('+i+')" style="margin-top:10px">' +
+      '<div class="'+virClass+'" onclick="toggleVirement('+i+')" style="margin-top:10px">' +
         '<input type="checkbox" '+(c.virement?'checked':'')+' onclick="event.stopPropagation();toggleVirement('+i+')" />' +
-        '<span>'+virementLabel+'</span>' +
+        '<span>'+virLabel+'</span>' +
       '</div>' +
     '</div>';
   }).join('');
 
   var diffTotal = tFab - tAym;
-  var diffNonSolde = tFabNonSolde - tAymNonSolde;
-
   var equilibreTotal;
   if(diffTotal > 0.01){
     equilibreTotal = '<strong>Fabrice</strong> doit recevoir <strong>'+fmt(diffTotal)+'</strong> de Aymeric';
   } else if(diffTotal < -0.01){
     equilibreTotal = '<strong>Aymeric</strong> doit recevoir <strong>'+fmt(-diffTotal)+'</strong> de Fabrice';
   } else {
-    equilibreTotal = 'Equilibre parfait entre vous deux';
+    equilibreTotal = 'Equilibre parfait sur tous les chantiers';
   }
 
-  var equilibreNonSolde;
-  if(diffNonSolde > 0.01){
-    equilibreNonSolde = '<strong>Fabrice</strong> doit recevoir <strong>'+fmt(diffNonSolde)+'</strong> de Aymeric';
-  } else if(diffNonSolde < -0.01){
-    equilibreNonSolde = '<strong>Aymeric</strong> doit recevoir <strong>'+fmt(-diffNonSolde)+'</strong> de Fabrice';
+  var aRegler;
+  if(soldeNonVire > 0.01){
+    aRegler = '<strong>Fabrice</strong> doit recevoir <strong>'+fmt(soldeNonVire)+'</strong> de Aymeric';
+  } else if(soldeNonVire < -0.01){
+    aRegler = '<strong>Aymeric</strong> doit recevoir <strong>'+fmt(-soldeNonVire)+'</strong> de Fabrice';
   } else {
-    equilibreNonSolde = '✅ Tout est regle entre vous deux';
+    aRegler = 'Tout est regle entre vous deux';
   }
 
   container.innerHTML =
@@ -523,7 +513,7 @@ function renderBilan() {
       '<div class="person-row"><div class="person-label"><div class="dot dot-fab"></div>Total Gain Net Fabrice</div><div class="big-number blue">'+fmt(tFab)+'</div></div>' +
       '<div class="person-row"><div class="person-label"><div class="dot dot-aym"></div>Total Gain Net Aymeric</div><div class="big-number orange">'+fmt(tAym)+'</div></div>' +
       '<div class="arrow-box" style="margin-top:12px">Tous chantiers : '+equilibreTotal+'</div>' +
-      '<div class="arrow-box-big" style="margin-top:8px">A regler maintenant :<br>'+equilibreNonSolde+'</div>' +
+      '<div class="arrow-box-big">A regler maintenant :<br>'+aRegler+'</div>' +
     '</div>' + rows;
 }
 
