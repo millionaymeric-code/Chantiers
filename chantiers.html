@@ -465,9 +465,9 @@ function renderBilan() {
   var diff = tFab - tAym;
   var equilibre;
   if(diff > 0.01){
-    equilibre = 'Pour etre a equilibre, <strong>Aymeric</strong> doit verser <strong>'+fmt(diff)+'</strong> a Fabrice';
+    equilibre = '<strong>Fabrice</strong> doit recevoir <strong>'+fmt(diff)+'</strong> de Aymeric';
   } else if(diff < -0.01){
-    equilibre = 'Pour etre a equilibre, <strong>Fabrice</strong> doit verser <strong>'+fmt(-diff)+'</strong> a Aymeric';
+    equilibre = '<strong>Aymeric</strong> doit recevoir <strong>'+fmt(-diff)+'</strong> de Fabrice';
   } else {
     equilibre = 'Equilibre parfait entre vous deux';
   }
