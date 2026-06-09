@@ -483,16 +483,6 @@ function renderBilan() {
     '</div>';
   }).join('');
 
-  var diffTotal = tFab - tAym;
-  var equilibreTotal;
-  if(diffTotal > 0.01){
-    equilibreTotal = '<strong>Fabrice</strong> doit recevoir <strong>'+fmt(diffTotal)+'</strong> de Aymeric';
-  } else if(diffTotal < -0.01){
-    equilibreTotal = '<strong>Aymeric</strong> doit recevoir <strong>'+fmt(-diffTotal)+'</strong> de Fabrice';
-  } else {
-    equilibreTotal = 'Equilibre parfait sur tous les chantiers';
-  }
-
   var aRegler;
   if(soldeNonVire > 0.01){
     aRegler = '<strong>Fabrice</strong> doit recevoir <strong>'+fmt(soldeNonVire)+'</strong> de Aymeric';
@@ -512,7 +502,6 @@ function renderBilan() {
       '<hr class="divider">' +
       '<div class="person-row"><div class="person-label"><div class="dot dot-fab"></div>Total Gain Net Fabrice</div><div class="big-number blue">'+fmt(tFab)+'</div></div>' +
       '<div class="person-row"><div class="person-label"><div class="dot dot-aym"></div>Total Gain Net Aymeric</div><div class="big-number orange">'+fmt(tAym)+'</div></div>' +
-      '<div class="arrow-box" style="margin-top:12px">Tous chantiers : '+equilibreTotal+'</div>' +
       '<div class="arrow-box-big">A regler maintenant :<br>'+aRegler+'</div>' +
     '</div>' + rows;
 }
