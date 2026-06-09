@@ -23,7 +23,6 @@
   nav button.active{background:var(--accent);color:#111;border-color:var(--accent);}
   .section{display:none;padding:20px;}.section.active{display:block;}
   .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin-bottom:14px;}
-  .card.solde{opacity:0.5;border-style:dashed;}
   .card-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;}
   .client-name{font-size:17px;font-weight:700;}
   .chip{font-family:'DM Mono',monospace;font-size:11px;padding:3px 9px;border-radius:6px;font-weight:600;}
@@ -85,18 +84,9 @@
   .empty-state .icon{font-size:36px;margin-bottom:10px;}
   .sub-label{font-size:11px;color:var(--muted);margin-top:4px;}
   .especes-badge{font-size:11px;font-weight:800;color:var(--accent);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px;padding:4px 0;}
-  .solde-badge{font-size:11px;font-weight:800;color:var(--green);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;}
-  .livre-badge{font-size:11px;font-weight:800;color:var(--blue);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;}
-  .virement-row{display:flex;align-items:center;gap:10px;margin-top:10px;padding:10px 12px;background:var(--surface);border-radius:10px;border:1px solid var(--border);cursor:pointer;}
-  .virement-row input[type="checkbox"]{width:20px;height:20px;cursor:pointer;accent-color:var(--green);flex-shrink:0;}
-  .virement-row span{font-size:13px;font-weight:600;}
-  .virement-row.done{border-color:var(--green);background:rgba(76,175,125,0.1);}
-  .virement-row.done span{color:var(--green);}
-  .livre-row{display:flex;align-items:center;gap:10px;margin-top:10px;padding:10px 12px;background:var(--surface);border-radius:10px;border:1px solid var(--border);cursor:pointer;}
-  .livre-row input[type="checkbox"]{width:20px;height:20px;cursor:pointer;accent-color:var(--blue);flex-shrink:0;}
-  .livre-row span{font-size:13px;font-weight:600;}
-  .livre-row.done{border-color:var(--blue);background:rgba(91,156,246,0.1);}
-  .livre-row.done span{color:var(--blue);}
+  .check-row{display:flex;align-items:center;gap:10px;margin-top:10px;padding:10px 12px;background:var(--surface);border-radius:10px;border:1px solid var(--border);}
+  .check-row input[type="checkbox"]{width:22px;height:22px;cursor:pointer;flex-shrink:0;-webkit-appearance:checkbox;appearance:checkbox;}
+  .check-row span{font-size:13px;font-weight:600;color:var(--text);}
   .perf-box{margin-top:10px;padding:12px;background:var(--surface);border-radius:10px;border:1px solid var(--border);}
   .perf-box label{font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:6px;}
   .perf-input-row{display:flex;gap:8px;align-items:center;}
@@ -104,7 +94,6 @@
   .perf-result{margin-top:10px;padding:10px;border-radius:8px;font-size:13px;font-weight:700;text-align:center;}
   .perf-ok{background:rgba(76,175,125,0.15);border:1px solid var(--green);color:var(--green);}
   .perf-bad{background:rgba(224,92,58,0.15);border:1px solid var(--red);color:var(--red);}
-  .perf-neutral{background:var(--border);color:var(--muted);}
 </style>
 </head>
 <body>
@@ -319,13 +308,13 @@ function setWho(who) {
   document.getElementById('who-btn-aym').className = 'who-btn'+(who==='Aymeric'?' sel-aym':'');
 }
 
-function toggleVirement(i) {
-  chantiers[i].virement = !chantiers[i].virement;
+function toggleVirement(i, checked) {
+  chantiers[i].virement = checked;
   sauverEnLigne().then(function(){ renderBilan(); });
 }
 
-function toggleLivre(i) {
-  chantiers[i].livre = !chantiers[i].livre;
+function toggleLivre(i, checked) {
+  chantiers[i].livre = checked;
   sauverEnLigne().then(function(){ renderBilan(); });
 }
 
@@ -477,12 +466,7 @@ function renderBilan() {
     var chipClass=c.responsable==='Fabrice'?'chip-fab':'chip-aym';
     var urssafLabel=c.declare!==false?'URSSAF 24%':'EN ESPECES';
     var urssafVal=c.declare!==false?('-'+fmt(r.urssaf)):'<span style="color:var(--accent);font-weight:800">EN ESPECES</span>';
-    var virClass = c.virement?'virement-row done':'virement-row';
-    var virLabel = c.virement?'Virement effectue':'Virement effectue ?';
-    var livreClass = c.livre?'livre-row done':'livre-row';
-    var livreLabel = c.livre?'Chantier termine / Livre':'Chantier termine / Livre ?';
 
-    // Calcul performance
     var jours = parseInt(c.jours) || 0;
     var perfHtml = '';
     if(jours > 0) {
@@ -492,13 +476,11 @@ function renderBilan() {
       var parJour = gainReel / jours;
       var cls = diff >= 0 ? 'perf-ok' : 'perf-bad';
       var icon = diff >= 0 ? 'BON' : 'INSUFFISANT';
-      perfHtml = '<div class="perf-result '+cls+'">'+icon+' — '+fmt(parJour)+' / jour'+(diff >= 0 ? ' (+'+fmt(diff)+' vs objectif)' : ' ('+fmt(diff)+' vs objectif)')+'</div>';
+      perfHtml = '<div class="perf-result '+cls+'">'+icon+' — '+fmt(parJour)+' / jour'+(diff >= 0 ? ' (+'+fmt(diff)+')' : ' ('+fmt(diff)+')')+'</div>';
     }
 
-    return '<div class="card'+(c.virement?' solde':'')+'">' +
+    return '<div class="card">' +
       (c.declare===false?'<div class="especes-badge">EN ESPECES</div>':'') +
-      (c.virement?'<div class="solde-badge">SOLDE</div>':'') +
-      (c.livre?'<div class="livre-badge">TERMINE / LIVRE</div>':'') +
       '<div class="card-header">' +
         '<div><div class="client-name">'+c.client+'</div><div class="tag-date">'+(c.date||'')+'</div></div>' +
         '<div class="chip '+chipClass+'">'+c.responsable+'</div>' +
@@ -519,13 +501,13 @@ function renderBilan() {
         '</div>' +
         perfHtml +
       '</div>' +
-      '<div class="'+livreClass+'" onclick="toggleLivre('+i+')" style="margin-top:10px">' +
-        '<input type="checkbox" '+(c.livre?'checked':'')+' onclick="event.stopPropagation();toggleLivre('+i+')" />' +
-        '<span>'+livreLabel+'</span>' +
+      '<div class="check-row">' +
+        '<input type="checkbox" '+(c.livre?'checked':'')+' onchange="toggleLivre('+i+',this.checked)" onclick="event.stopPropagation()" />' +
+        '<span>Chantier termine</span>' +
       '</div>' +
-      '<div class="'+virClass+'" onclick="toggleVirement('+i+')">' +
-        '<input type="checkbox" '+(c.virement?'checked':'')+' onclick="event.stopPropagation();toggleVirement('+i+')" />' +
-        '<span>'+virLabel+'</span>' +
+      '<div class="check-row">' +
+        '<input type="checkbox" '+(c.virement?'checked':'')+' onchange="toggleVirement('+i+',this.checked)" onclick="event.stopPropagation()" />' +
+        '<span>Virement effectue</span>' +
       '</div>' +
     '</div>';
   }).join('');
@@ -555,7 +537,7 @@ function renderBilan() {
 
 function exporterExcel() {
   var BOM='\uFEFF';
-  var csv=BOM+'Client;Date;Responsable;Declare;Livre;Solde;Jours;Devis;URSSAF;Dep.Fabrice;Dep.Aymeric;Net;Part Fabrice;Part Aymeric;Transfert\n';
+  var csv=BOM+'Client;Date;Responsable;Declare;Termine;Solde;Jours;Devis;URSSAF;Dep.Fabrice;Dep.Aymeric;Net;Part Fabrice;Part Aymeric;Transfert\n';
   chantiers.forEach(function(c){
     var r=calcChantier(c);
     csv+='"'+c.client+'";"'+(c.date||'')+'"; "'+c.responsable+'";"'+(c.declare!==false?'Oui':'Non')+'"; "'+(c.livre?'Oui':'Non')+'"; "'+(c.virement?'Solde':'En cours')+'"; "'+(c.jours||0)+'"; "'+r.devis.toFixed(2)+'"; "'+r.urssaf.toFixed(2)+'"; "'+r.depFab.toFixed(2)+'"; "'+r.depAym.toFixed(2)+'"; "'+r.resultatNet.toFixed(2)+'"; "'+r.recoit_fab.toFixed(2)+'"; "'+r.recoit_aym.toFixed(2)+'"; "'+r.transfert.de+' > '+r.transfert.a+' : '+r.transfert.mnt.toFixed(2)+' euro"\n';
