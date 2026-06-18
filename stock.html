@@ -29,7 +29,7 @@
   .item-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;}
   .item-name{font-size:16px;font-weight:700;}
   .item-cat{font-size:11px;color:var(--muted);margin-top:2px;}
-  .badge-alerte{font-size:10px;font-weight:800;background:var(--red);color:#fff;padding:2px 7px;border-radius:5px;}
+  .badge-alerte{font-size:10px;font-weight:800;background:var(--red);color:#fff;padding:2px 7px;border-radius:5px;flex-shrink:0;}
   .qty-row{display:flex;align-items:center;justify-content:space-between;margin-top:8px;}
   .qty-controls{display:flex;align-items:center;gap:12px;}
   .qty-btn{width:40px;height:40px;border:none;border-radius:10px;font-size:22px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
@@ -37,7 +37,7 @@
   .qty-btn.plus{background:rgba(76,175,125,0.2);color:var(--green);}
   .qty-val{font-family:'DM Mono',monospace;font-size:22px;font-weight:700;min-width:50px;text-align:center;}
   .qty-unit{font-size:12px;color:var(--muted);margin-top:2px;text-align:center;}
-  .seuil-info{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;}
+  .seuil-info{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;text-align:right;}
   .transfert-btn{margin-top:10px;width:100%;padding:10px;background:var(--surface);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'Syne',sans-serif;font-size:13px;font-weight:600;cursor:pointer;}
   .form-group{margin-bottom:14px;}
   .form-group label{display:block;font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;}
@@ -64,8 +64,8 @@
   .toggle-group{display:flex;gap:8px;}
   .toggle-btn{flex:1;padding:12px;border:2px solid var(--border);border-radius:10px;background:transparent;color:var(--muted);font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;}
   .toggle-btn.sel{border-color:var(--accent);color:var(--accent);background:rgba(240,192,64,0.1);}
-  .transfert-modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:300;overflow-y:auto;padding:20px;}
-  .transfert-modal-overlay.open{display:block;}
+  .cat-title{font-size:12px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:1px;padding:8px 0 6px;border-bottom:1px solid var(--border);margin-bottom:10px;}
+  .init-btn{width:100%;padding:12px;background:rgba(240,192,64,0.15);border:1px solid var(--accent);border-radius:10px;color:var(--accent);font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;margin-bottom:16px;}
 </style>
 </head>
 <body>
@@ -81,6 +81,7 @@
 
 <div id="lyon" class="section active">
   <p class="section-title">Stock Lyon 5ème</p>
+  <button class="init-btn" id="init-btn-lyon" onclick="initialiserStock()" style="display:none">⚡ Initialiser avec la liste de base</button>
   <input class="search-box" type="text" placeholder="Rechercher un article..." oninput="renderStock('lyon')" id="search-lyon" />
   <div class="stats-row">
     <div class="stat-box"><div class="stat-val" id="total-lyon">0</div><div class="stat-label">Articles</div></div>
@@ -104,22 +105,22 @@
   <div class="card">
     <div class="form-group">
       <label>Nom de l'article</label>
-      <input type="text" id="new-nom" placeholder="Ex: Peinture blanche" />
+      <input type="text" id="new-nom" placeholder="Ex: Enduit de finition" />
     </div>
     <div class="form-group">
       <label>Categorie</label>
-      <input type="text" id="new-cat" placeholder="Ex: Peinture, Electricite, Plomberie..." />
+      <input type="text" id="new-cat" placeholder="Ex: Placo, Peinture, Electricite..." />
     </div>
     <div class="form-group">
       <label>Unite</label>
-      <input type="text" id="new-unite" placeholder="Ex: rouleaux, sacs, metres, pieces..." />
+      <input type="text" id="new-unite" placeholder="Ex: sacs, rouleaux, metres, pieces..." />
     </div>
     <div class="form-group">
       <label>Stock initial</label>
       <input type="number" id="new-qty" placeholder="0" min="0" step="1" />
     </div>
     <div class="form-group">
-      <label>Seuil d'alerte (quantite minimum)</label>
+      <label>Seuil d'alerte</label>
       <input type="number" id="new-seuil" placeholder="Ex: 2" min="0" step="1" />
     </div>
     <div class="form-group">
@@ -165,7 +166,7 @@
 </div>
 
 <!-- MODAL TRANSFERT -->
-<div class="transfert-modal-overlay" id="transfert-modal">
+<div class="modal-overlay" id="transfert-modal">
   <div class="modal">
     <h2>Transferer</h2>
     <p id="transfert-info" style="color:var(--muted);font-size:14px;margin-bottom:20px;"></p>
@@ -183,8 +184,55 @@ var BIN_ID = '6a344e7fda38895dfed987e9';
 var API_KEY = '$2a$10$sRHPt6zqWj6D0X9vNmu6o0Js0VZsHGuLE/y9G1Px.0WuvnNjBMwtC';
 var API_URL = 'https://api.jsonbin.io/v3/b/' + BIN_ID;
 
+var LISTE_BASE = [
+  {nom:'Sous-couche universelle', cat:'Peinture & Enduits', unite:'sceaux', qty:0, seuil:1},
+  {nom:'Enduit de lissage', cat:'Peinture & Enduits', unite:'sacs', qty:0, seuil:1},
+  {nom:'Enduit de rebouchage', cat:'Peinture & Enduits', unite:'sacs', qty:0, seuil:1},
+  {nom:'Primaire d\'accrochage', cat:'Peinture & Enduits', unite:'bidons', qty:0, seuil:1},
+  {nom:'Baches de protection', cat:'Peinture & Enduits', unite:'pieces', qty:0, seuil:2},
+  {nom:'Plaques de placo BA13', cat:'Placo & Cloisons', unite:'plaques', qty:0, seuil:5},
+  {nom:'Plaques de placo hydro', cat:'Placo & Cloisons', unite:'plaques', qty:0, seuil:3},
+  {nom:'Rails', cat:'Placo & Cloisons', unite:'barres', qty:0, seuil:5},
+  {nom:'Montants', cat:'Placo & Cloisons', unite:'barres', qty:0, seuil:5},
+  {nom:'Bande a joint', cat:'Placo & Cloisons', unite:'rouleaux', qty:0, seuil:2},
+  {nom:'Enduit de finition', cat:'Placo & Cloisons', unite:'sacs', qty:0, seuil:2},
+  {nom:'Colle a joint', cat:'Placo & Cloisons', unite:'sacs', qty:0, seuil:2},
+  {nom:'Bande', cat:'Placo & Cloisons', unite:'rouleaux', qty:0, seuil:2},
+  {nom:'Platre', cat:'Placo & Cloisons', unite:'sacs', qty:0, seuil:2},
+  {nom:'Sipo Rex (carottes)', cat:'Placo & Cloisons', unite:'boites', qty:0, seuil:1},
+  {nom:'Toile de verre', cat:'Placo & Cloisons', unite:'rouleaux', qty:0, seuil:2},
+  {nom:'Colle a toile', cat:'Placo & Cloisons', unite:'sceaux', qty:0, seuil:1},
+  {nom:'Tasseaux bois', cat:'Bois & Menuiserie', unite:'barres', qty:0, seuil:5},
+  {nom:'Plinthes medium blanc', cat:'Bois & Menuiserie', unite:'barres', qty:0, seuil:5},
+  {nom:'Quart de rond', cat:'Bois & Menuiserie', unite:'barres', qty:0, seuil:5},
+  {nom:'Lasure / huile bois', cat:'Bois & Menuiserie', unite:'bidons', qty:0, seuil:1},
+  {nom:'Seuil de porte', cat:'Portes & Serrurerie', unite:'pieces', qty:0, seuil:1},
+  {nom:'Seuil de rattrapage', cat:'Portes & Serrurerie', unite:'pieces', qty:0, seuil:1},
+  {nom:'Serrure porte interieure', cat:'Portes & Serrurerie', unite:'pieces', qty:0, seuil:1},
+  {nom:'Cylindre a cle', cat:'Portes & Serrurerie', unite:'pieces', qty:0, seuil:1},
+  {nom:'Colle a carrelage', cat:'Carrelage & Sol', unite:'sacs', qty:0, seuil:2},
+  {nom:'Joint carrelage blanc', cat:'Carrelage & Sol', unite:'sacs', qty:0, seuil:1},
+  {nom:'Joint carrelage gris', cat:'Carrelage & Sol', unite:'sacs', qty:0, seuil:1},
+  {nom:'Croisillons', cat:'Carrelage & Sol', unite:'sachets', qty:0, seuil:2},
+  {nom:'Primaire sol', cat:'Carrelage & Sol', unite:'bidons', qty:0, seuil:1},
+  {nom:'Ragreage', cat:'Carrelage & Sol', unite:'sacs', qty:0, seuil:2},
+  {nom:'Silicone transparent', cat:'Carrelage & Sol', unite:'cartouches', qty:0, seuil:2},
+  {nom:'Teflon', cat:'Plomberie', unite:'rouleaux', qty:0, seuil:2},
+  {nom:'Silicone blanc', cat:'Plomberie', unite:'cartouches', qty:0, seuil:2},
+  {nom:'Raccords rapides plomberie', cat:'Plomberie', unite:'pieces', qty:0, seuil:5},
+  {nom:'Colliers de serrage', cat:'Plomberie', unite:'pieces', qty:0, seuil:5},
+  {nom:'Joints plomberie', cat:'Plomberie', unite:'pieces', qty:0, seuil:10},
+  {nom:'Cable 1.5mm', cat:'Electricite', unite:'metres', qty:0, seuil:10},
+  {nom:'Cable 2.5mm', cat:'Electricite', unite:'metres', qty:0, seuil:10},
+  {nom:'Prises electriques', cat:'Electricite', unite:'pieces', qty:0, seuil:5},
+  {nom:'Interrupteurs', cat:'Electricite', unite:'pieces', qty:0, seuil:5},
+  {nom:'Dominos', cat:'Electricite', unite:'boites', qty:0, seuil:2},
+  {nom:'Gaines electriques', cat:'Electricite', unite:'metres', qty:0, seuil:10},
+  {nom:'Boites de derivation', cat:'Electricite', unite:'pieces', qty:0, seuil:5},
+  {nom:'Mousse expansive', cat:'Divers', unite:'bombes', qty:0, seuil:2}
+];
+
 var data = {lyon:[], bagnols:[]};
-var currentSection = 'lyon';
 var editSection = null;
 var editIndex = null;
 var newStock = null;
@@ -206,6 +254,12 @@ function chargerDonnees() {
       if(!data.lyon) data.lyon = [];
       if(!data.bagnols) data.bagnols = [];
       setStatus('Synchronise', 'sync-ok');
+      // Afficher bouton init si stocks vides
+      if(data.lyon.length === 0) {
+        document.getElementById('init-btn-lyon').style.display = 'block';
+      } else {
+        document.getElementById('init-btn-lyon').style.display = 'none';
+      }
       renderStock('lyon');
       renderStock('bagnols');
     })
@@ -223,6 +277,18 @@ function sauverEnLigne() {
   .catch(function(){ setStatus('Erreur sauvegarde', 'sync-error'); });
 }
 
+function initialiserStock() {
+  if(!confirm('Initialiser les deux stocks avec la liste de base ? Les stocks actuels seront remplacés.')) return;
+  data.lyon = LISTE_BASE.map(function(a){ return Object.assign({}, a); });
+  data.bagnols = LISTE_BASE.map(function(a){ return Object.assign({}, a); });
+  sauverEnLigne().then(function(){
+    document.getElementById('init-btn-lyon').style.display = 'none';
+    renderStock('lyon');
+    renderStock('bagnols');
+    alert('Stocks initialises !');
+  });
+}
+
 function showSection(id) {
   document.querySelectorAll('.section').forEach(function(s){s.classList.remove('active');});
   document.querySelectorAll('nav button').forEach(function(b){b.classList.remove('active');});
@@ -230,7 +296,6 @@ function showSection(id) {
   ['lyon','bagnols','ajouter'].forEach(function(s,i){
     if(s===id) document.querySelectorAll('nav button')[i].classList.add('active');
   });
-  currentSection = id;
   if(id==='lyon'||id==='bagnols') chargerDonnees();
 }
 
@@ -242,34 +307,44 @@ function setStock(val) {
 }
 
 function renderStock(depot) {
-  var search = document.getElementById('search-'+depot).value.toLowerCase();
+  var searchEl = document.getElementById('search-'+depot);
+  var search = searchEl ? searchEl.value.toLowerCase() : '';
   var items = data[depot] || [];
-  var filtered = items.filter(function(a){ return a.nom.toLowerCase().includes(search) || (a.cat||'').toLowerCase().includes(search); });
+  var filtered = items.filter(function(a){
+    return a.nom.toLowerCase().includes(search) || (a.cat||'').toLowerCase().includes(search);
+  });
   var alertes = items.filter(function(a){ return a.qty <= (a.seuil||0); }).length;
   document.getElementById('total-'+depot).textContent = items.length;
   document.getElementById('alerte-'+depot).textContent = alertes;
 
   var container = document.getElementById('list-'+depot);
   if(!filtered.length){
-    container.innerHTML = '<div class="empty-state"><div class="icon">📦</div>Aucun article.<br>Appuie sur + Ajouter.</div>';
+    container.innerHTML = '<div class="empty-state"><div class="icon">📦</div>Aucun article.</div>';
     return;
   }
 
-  // Trier : alertes en premier
   filtered.sort(function(a,b){
     var aAlert = a.qty <= (a.seuil||0) ? 0 : 1;
     var bAlert = b.qty <= (b.seuil||0) ? 0 : 1;
-    return aAlert - bAlert;
+    if(aAlert !== bAlert) return aAlert - bAlert;
+    return (a.cat||'').localeCompare(b.cat||'');
   });
 
   var dest = depot === 'lyon' ? 'bagnols' : 'lyon';
   var destLabel = depot === 'lyon' ? 'Bagnols' : 'Lyon 5e';
+  var lastCat = '';
 
-  container.innerHTML = filtered.map(function(a, i){
+  container.innerHTML = filtered.map(function(a){
     var realIndex = data[depot].indexOf(a);
     var isAlerte = a.qty <= (a.seuil||0);
     var cardClass = isAlerte ? 'card alerte' : 'card ok';
-    return '<div class="'+cardClass+'">' +
+    var catHeader = '';
+    if(a.cat !== lastCat && !search) {
+      catHeader = '<div class="cat-title">'+(a.cat||'')+'</div>';
+      lastCat = a.cat;
+    }
+    return catHeader +
+      '<div class="'+cardClass+'">' +
       '<div class="item-header">' +
         '<div>' +
           '<div class="item-name">'+a.nom+'</div>' +
@@ -286,9 +361,9 @@ function renderStock(depot) {
           '</div>' +
           '<button class="qty-btn plus" onclick="changeQty(\''+depot+'\','+realIndex+',+1)">+</button>' +
         '</div>' +
-        '<div class="seuil-info">Seuil : '+(a.seuil||0)+' '+(a.unite||'')+'<br><span style="color:var(--blue);cursor:pointer" onclick="ouvrirModal(\''+depot+'\','+realIndex+')">✏️ Modifier</span></div>' +
+        '<div class="seuil-info">Seuil : '+(a.seuil||0)+'<br><span style="color:var(--blue);cursor:pointer" onclick="ouvrirModal(\''+depot+'\','+realIndex+')">✏️ Modifier</span></div>' +
       '</div>' +
-      '<button class="transfert-btn" onclick="ouvrirTransfert(\''+depot+'\','+realIndex+')">↔️ Transferer vers '+destLabel+'</button>' +
+      '<button class="transfert-btn" onclick="ouvrirTransfert(\''+depot+'\','+realIndex+')">↔ Transferer vers '+destLabel+'</button>' +
     '</div>';
   }).join('');
 }
@@ -319,12 +394,13 @@ function fermerModal() {
 }
 
 function sauvegarderArticle() {
-  data[editSection][editIndex].nom = document.getElementById('edit-nom').value.trim();
-  data[editSection][editIndex].cat = document.getElementById('edit-cat').value.trim();
-  data[editSection][editIndex].unite = document.getElementById('edit-unite').value.trim();
-  data[editSection][editIndex].qty = parseInt(document.getElementById('edit-qty').value) || 0;
-  data[editSection][editIndex].seuil = parseInt(document.getElementById('edit-seuil').value) || 0;
-  sauverEnLigne().then(function(){ fermerModal(); renderStock(editSection||currentSection); });
+  var s = editSection;
+  data[s][editIndex].nom = document.getElementById('edit-nom').value.trim();
+  data[s][editIndex].cat = document.getElementById('edit-cat').value.trim();
+  data[s][editIndex].unite = document.getElementById('edit-unite').value.trim();
+  data[s][editIndex].qty = parseInt(document.getElementById('edit-qty').value) || 0;
+  data[s][editIndex].seuil = parseInt(document.getElementById('edit-seuil').value) || 0;
+  sauverEnLigne().then(function(){ fermerModal(); renderStock(s); });
 }
 
 function supprimerArticle() {
@@ -342,23 +418,20 @@ function ajouterArticle() {
   var seuil = parseInt(document.getElementById('new-seuil').value) || 0;
   if(!nom){ alert('Entre le nom de l\'article.'); return; }
   if(!newStock){ alert('Choisis dans quel stock.'); return; }
-
   var article = {nom:nom, cat:cat, unite:unite, qty:qty, seuil:seuil};
-
   if(newStock === 'les2') {
     data.lyon.push(Object.assign({}, article));
     data.bagnols.push(Object.assign({}, article));
   } else {
     data[newStock].push(article);
   }
-
   sauverEnLigne().then(function(){
     document.getElementById('new-nom').value='';
     document.getElementById('new-cat').value='';
     document.getElementById('new-unite').value='';
     document.getElementById('new-qty').value='';
     document.getElementById('new-seuil').value='';
-    newStock = null;
+    newStock=null;
     document.getElementById('btn-stock-lyon').className='toggle-btn';
     document.getElementById('btn-stock-bagnols').className='toggle-btn';
     document.getElementById('btn-stock-les2').className='toggle-btn';
@@ -367,7 +440,6 @@ function ajouterArticle() {
   });
 }
 
-// TRANSFERT
 function ouvrirTransfert(depot, i) {
   transfertSection = depot;
   transfertIndex = i;
@@ -389,21 +461,17 @@ function confirmerTransfert() {
   var src = transfertSection;
   var dest = src === 'lyon' ? 'bagnols' : 'lyon';
   var article = data[src][transfertIndex];
-
   if(qty > article.qty){ alert('Stock insuffisant !'); return; }
-
-  // Retirer du stock source
   data[src][transfertIndex].qty -= qty;
-
-  // Chercher si article existe dans destination
-  var destIndex = data[dest].findIndex(function(a){ return a.nom.toLowerCase() === article.nom.toLowerCase(); });
+  var destIndex = -1;
+  for(var i=0; i<data[dest].length; i++){
+    if(data[dest][i].nom.toLowerCase() === article.nom.toLowerCase()){ destIndex = i; break; }
+  }
   if(destIndex >= 0) {
     data[dest][destIndex].qty += qty;
   } else {
-    // Creer l'article dans la destination
     data[dest].push({nom:article.nom, cat:article.cat, unite:article.unite, qty:qty, seuil:article.seuil});
   }
-
   sauverEnLigne().then(function(){
     fermerTransfert();
     renderStock(src);
