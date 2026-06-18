@@ -41,7 +41,7 @@
  .transfert-btn{margin-top:10px;width:100%;padding:10px;background:var(--surface);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'Syne',sans-serif;font-size:13px;font-weight:600;cursor:pointer;}
  .form-group{margin-bottom:14px;}
  .form-group label{display:block;font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;}
- input,select{width:100%;background:var(--surface);border:1.5px solid var(--border);border-radius:10px;padding:13px 14px;color:var(--text);font-family:'Syne',sans-serif;font-size:15px;outline:none;-webkit-appearance:none;}
+ input{width:100%;background:var(--surface);border:1.5px solid var(--border);border-radius:10px;padding:13px 14px;color:var(--text);font-family:'Syne',sans-serif;font-size:15px;outline:none;-webkit-appearance:none;}
  input:focus{border-color:var(--accent);}
  input[type="number"]{font-family:'DM Mono',monospace;}
  .btn{width:100%;padding:15px;border:none;border-radius:12px;font-family:'Syne',sans-serif;font-size:15px;font-weight:700;cursor:pointer;margin-top:10px;}
@@ -102,26 +102,11 @@
 <div id="ajouter" class="section">
  <p class="section-title">Ajouter un article</p>
  <div class="card">
-   <div class="form-group">
-     <label>Nom de l'article</label>
-     <input type="text" id="new-nom" placeholder="Ex: Enduit de finition" />
-   </div>
-   <div class="form-group">
-     <label>Categorie</label>
-     <input type="text" id="new-cat" placeholder="Ex: Placo, Peinture..." />
-   </div>
-   <div class="form-group">
-     <label>Unite</label>
-     <input type="text" id="new-unite" placeholder="Ex: sacs, rouleaux, metres..." />
-   </div>
-   <div class="form-group">
-     <label>Stock initial</label>
-     <input type="number" id="new-qty" placeholder="0" min="0" step="1" />
-   </div>
-   <div class="form-group">
-     <label>Seuil d'alerte</label>
-     <input type="number" id="new-seuil" placeholder="Ex: 2" min="0" step="1" />
-   </div>
+   <div class="form-group"><label>Nom de l'article</label><input type="text" id="new-nom" placeholder="Ex: Enduit de finition" /></div>
+   <div class="form-group"><label>Categorie</label><input type="text" id="new-cat" placeholder="Ex: Placo, Peinture..." /></div>
+   <div class="form-group"><label>Unite</label><input type="text" id="new-unite" placeholder="Ex: sacs, rouleaux, metres..." /></div>
+   <div class="form-group"><label>Stock initial</label><input type="number" id="new-qty" placeholder="0" min="0" step="1" /></div>
+   <div class="form-group"><label>Seuil d'alerte</label><input type="number" id="new-seuil" placeholder="Ex: 2" min="0" step="1" /></div>
    <div class="form-group">
      <label>Dans quel stock ?</label>
      <div class="toggle-group">
@@ -159,8 +144,8 @@
 </div>
 
 <script>
-var BIN_ID = '6a344e7fda38895dfed987e9';
-var API_KEY = '$2a$10$SrKI8.qt8P6i/NO83je.5.rDHEdZJoIBS9i3f8pKGX2nDNkaP/eyK';
+var BIN_ID = '6a21d867da38895dfe888684';
+var API_KEY = '$2a$10$NRRQdixtQ/NsijZcDxQ47OYwm3YGBJXnv56wrj6SZJOokRbWEhRa6';
 var API_URL = 'https://api.jsonbin.io/v3/b/' + BIN_ID;
 
 var LISTE_BASE = [
@@ -211,7 +196,7 @@ var LISTE_BASE = [
  {nom:'Mousse expansive',cat:'Divers',unite:'bombes',qty:0,seuil:2}
 ];
 
-var data = {lyon:[], bagnols:[]};
+var stockData = {lyon:[], bagnols:[]};
 var editSection = null;
 var editIndex = null;
 var newStock = null;
@@ -229,11 +214,11 @@ function chargerDonnees() {
  return fetch(API_URL + '/latest', {headers:{'X-Access-Key':API_KEY}})
    .then(function(r){ return r.json(); })
    .then(function(d){
-     data = d.record;
-     if(!data.lyon) data.lyon = [];
-     if(!data.bagnols) data.bagnols = [];
+     var record = d.record;
+     stockData.lyon = record.stock_lyon || [];
+     stockData.bagnols = record.stock_bagnols || [];
      setStatus('Synchronise', 'sync-ok');
-     if(data.lyon.length === 0) {
+     if(stockData.lyon.length === 0) {
        document.getElementById('init-btn-lyon').style.display = 'block';
      } else {
        document.getElementById('init-btn-lyon').style.display = 'none';
@@ -246,19 +231,26 @@ function chargerDonnees() {
 
 function sauverEnLigne() {
  setStatus('Sauvegarde...', 'sync-loading');
- return fetch(API_URL, {
-   method:'PUT',
-   headers:{'Content-Type':'application/json','X-Access-Key':API_KEY},
-   body:JSON.stringify(data)
- })
- .then(function(){ setStatus('Synchronise', 'sync-ok'); })
- .catch(function(){ setStatus('Erreur sauvegarde', 'sync-error'); });
+ return fetch(API_URL + '/latest', {headers:{'X-Access-Key':API_KEY}})
+   .then(function(r){ return r.json(); })
+   .then(function(d){
+     var record = d.record;
+     record.stock_lyon = stockData.lyon;
+     record.stock_bagnols = stockData.bagnols;
+     return fetch(API_URL, {
+       method:'PUT',
+       headers:{'Content-Type':'application/json','X-Access-Key':API_KEY},
+       body:JSON.stringify(record)
+     });
+   })
+   .then(function(){ setStatus('Synchronise', 'sync-ok'); })
+   .catch(function(){ setStatus('Erreur sauvegarde', 'sync-error'); });
 }
 
 function initialiserStock() {
  if(!confirm('Initialiser les deux stocks avec la liste de base ?')) return;
- data.lyon = LISTE_BASE.map(function(a){ return Object.assign({},a); });
- data.bagnols = LISTE_BASE.map(function(a){ return Object.assign({},a); });
+ stockData.lyon = LISTE_BASE.map(function(a){ return Object.assign({},a); });
+ stockData.bagnols = LISTE_BASE.map(function(a){ return Object.assign({},a); });
  sauverEnLigne().then(function(){
    document.getElementById('init-btn-lyon').style.display = 'none';
    renderStock('lyon');
@@ -287,7 +279,7 @@ function setStock(val) {
 function renderStock(depot) {
  var searchEl = document.getElementById('search-'+depot);
  var search = searchEl ? searchEl.value.toLowerCase() : '';
- var items = data[depot] || [];
+ var items = stockData[depot] || [];
  var filtered = items.filter(function(a){
    return a.nom.toLowerCase().includes(search)||(a.cat||'').toLowerCase().includes(search);
  });
@@ -309,7 +301,7 @@ function renderStock(depot) {
  var destLabel = depot==='lyon'?'Bagnols':'Lyon 5e';
  var lastCat = '';
  container.innerHTML = filtered.map(function(a){
-   var realIndex = data[depot].indexOf(a);
+   var realIndex = stockData[depot].indexOf(a);
    var isAlerte = a.qty<=(a.seuil||0);
    var catHeader = '';
    if(a.cat!==lastCat&&!search){
@@ -336,15 +328,15 @@ function renderStock(depot) {
 }
 
 function changeQty(depot,i,delta){
- var n=(data[depot][i].qty||0)+delta;
+ var n=(stockData[depot][i].qty||0)+delta;
  if(n<0)n=0;
- data[depot][i].qty=n;
+ stockData[depot][i].qty=n;
  sauverEnLigne().then(function(){renderStock(depot);});
 }
 
 function ouvrirModal(depot,i){
  editSection=depot; editIndex=i;
- var a=data[depot][i];
+ var a=stockData[depot][i];
  document.getElementById('modal-nom').textContent=a.nom;
  document.getElementById('edit-nom').value=a.nom;
  document.getElementById('edit-cat').value=a.cat||'';
@@ -361,18 +353,18 @@ function fermerModal(){
 
 function sauvegarderArticle(){
  var s=editSection;
- data[s][editIndex].nom=document.getElementById('edit-nom').value.trim();
- data[s][editIndex].cat=document.getElementById('edit-cat').value.trim();
- data[s][editIndex].unite=document.getElementById('edit-unite').value.trim();
- data[s][editIndex].qty=parseInt(document.getElementById('edit-qty').value)||0;
- data[s][editIndex].seuil=parseInt(document.getElementById('edit-seuil').value)||0;
+ stockData[s][editIndex].nom=document.getElementById('edit-nom').value.trim();
+ stockData[s][editIndex].cat=document.getElementById('edit-cat').value.trim();
+ stockData[s][editIndex].unite=document.getElementById('edit-unite').value.trim();
+ stockData[s][editIndex].qty=parseInt(document.getElementById('edit-qty').value)||0;
+ stockData[s][editIndex].seuil=parseInt(document.getElementById('edit-seuil').value)||0;
  sauverEnLigne().then(function(){fermerModal();renderStock(s);});
 }
 
 function supprimerArticle(){
  if(!confirm('Supprimer cet article ?'))return;
  var s=editSection;
- data[s].splice(editIndex,1);
+ stockData[s].splice(editIndex,1);
  sauverEnLigne().then(function(){fermerModal();renderStock(s);});
 }
 
@@ -385,8 +377,8 @@ function ajouterArticle(){
  if(!nom){alert('Entre le nom.');return;}
  if(!newStock){alert('Choisis le stock.');return;}
  var a={nom:nom,cat:cat,unite:unite,qty:qty,seuil:seuil};
- if(newStock==='les2'){data.lyon.push(Object.assign({},a));data.bagnols.push(Object.assign({},a));}
- else{data[newStock].push(a);}
+ if(newStock==='les2'){stockData.lyon.push(Object.assign({},a));stockData.bagnols.push(Object.assign({},a));}
+ else{stockData[newStock].push(a);}
  sauverEnLigne().then(function(){
    document.getElementById('new-nom').value='';
    document.getElementById('new-cat').value='';
@@ -404,7 +396,7 @@ function ajouterArticle(){
 
 function ouvrirTransfert(depot,i){
  transfertSection=depot; transfertIndex=i;
- var a=data[depot][i];
+ var a=stockData[depot][i];
  var dest=depot==='lyon'?'Bagnols':'Lyon 5e';
  document.getElementById('transfert-info').textContent=a.nom+' — Stock actuel : '+a.qty+' '+(a.unite||'')+' → vers '+dest;
  document.getElementById('transfert-qty').value='';
@@ -421,15 +413,15 @@ function confirmerTransfert(){
  if(qty<=0){alert('Entre une quantite valide.');return;}
  var src=transfertSection;
  var dest=src==='lyon'?'bagnols':'lyon';
- var article=data[src][transfertIndex];
+ var article=stockData[src][transfertIndex];
  if(qty>article.qty){alert('Stock insuffisant !');return;}
- data[src][transfertIndex].qty-=qty;
+ stockData[src][transfertIndex].qty-=qty;
  var di=-1;
- for(var i=0;i<data[dest].length;i++){
-   if(data[dest][i].nom.toLowerCase()===article.nom.toLowerCase()){di=i;break;}
+ for(var i=0;i<stockData[dest].length;i++){
+   if(stockData[dest][i].nom.toLowerCase()===article.nom.toLowerCase()){di=i;break;}
  }
- if(di>=0){data[dest][di].qty+=qty;}
- else{data[dest].push({nom:article.nom,cat:article.cat,unite:article.unite,qty:qty,seuil:article.seuil});}
+ if(di>=0){stockData[dest][di].qty+=qty;}
+ else{stockData[dest].push({nom:article.nom,cat:article.cat,unite:article.unite,qty:qty,seuil:article.seuil});}
  sauverEnLigne().then(function(){
    fermerTransfert();
    renderStock(src);
