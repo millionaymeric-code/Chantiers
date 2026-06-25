@@ -329,7 +329,7 @@ function updateJours(i,val){chantiers[i].jours=parseInt(val)||0;sauverEnLigne().
 function renderListe(){
   var container=document.getElementById('chantiers-list');
   var actifs=chantiers.filter(function(c){return !c.livre;});
-  actifs.sort(function(a,b){return new Date(b.date)-new Date(a.date);});
+  actifs.sort(function(a,b){return new Date(b.date)-new new Date(a.date);});
   if(!actifs.length){container.innerHTML='<div class="empty-state"><div class="icon">🏗️</div>Aucun chantier en cours.</div>';return;}
   container.innerHTML=actifs.map(function(c){
     var ri=chantiers.indexOf(c);
@@ -477,15 +477,16 @@ function renderBilan(){
   var container=document.getElementById('bilan-content');
   if(!chantiers.length){container.innerHTML='<div class="empty-state"><div class="icon">📊</div>Aucune donnee.</div>';return;}
 
-  // Solde a regler
+  // Solde : uniquement chantiers TERMINES et NON vires
   var soldeNonVire=0;
   chantiers.forEach(function(c){
+    if(!c.livre) return; // ignorer chantiers non termines
+    if(c.virement) return; // ignorer si virement deja fait
     var r=calcChantier(c);
-    if(!c.virement){
-      if(r.transfert.de==='Aymeric'&&r.transfert.a==='Fabrice') soldeNonVire+=r.transfert.mnt;
-      else soldeNonVire-=r.transfert.mnt;
-    }
+    if(r.transfert.de==='Aymeric'&&r.transfert.a==='Fabrice') soldeNonVire+=r.transfert.mnt;
+    else soldeNonVire-=r.transfert.mnt;
   });
+
   var aRegler;
   if(soldeNonVire>0.01) aRegler='<strong>Aymeric</strong> doit verser <strong>'+fmt(soldeNonVire)+'</strong> a Fabrice';
   else if(soldeNonVire<-0.01) aRegler='<strong>Fabrice</strong> doit verser <strong>'+fmt(-soldeNonVire)+'</strong> a Aymeric';
@@ -507,7 +508,7 @@ function renderBilan(){
         md.ca+=r.devis;
         if(c.responsable==='Fabrice') md.urssafFab+=r.urssaf;
         else md.urssafAym+=r.urssaf;
-        md.gainChacun+=r.part; // gain identique pour les deux = resultatNet / 2
+        md.gainChacun+=r.part;
       }
     });
   });
