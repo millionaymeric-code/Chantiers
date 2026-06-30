@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Mes Chantiers Solo</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&display=swap');
+  :root {
+    --bg:#0f0f0f;--surface:#1a1a1a;--card:#222;--border:#2e2e2e;
+    --accent:#f0c040;--green:#4caf7d;--red:#e05c3a;--blue:#5b9cf6;
+    --orange:#f0a040;--text:#f0ede6;--muted:#888;--radius:14px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:50px;}
+  header{background:var(--surface);padding:22px 20px 16px;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;}
+  header h1{font-size:22px;font-weight:800;}
+  header h1 span{color:var(--accent);}
+  .sync-status{font-size:11px;margin-top:4px;font-family:'DM Mono',monospace;}
+  .sync-ok{color:var(--green);}.sync-loading{color:var(--orange);}.sync-error{color:var(--red);}
+  nav{display:flex;gap:4px;margin-top:14px;}
+  nav button{flex:1;padding:8px 2px;border:1.5px solid var(--border);background:transparent;color:var(--muted);border-radius:10px;font-family:'Syne',sans-serif;font-size:11px;font-weight:600;cursor:pointer;}
+  nav button.active{background:var(--accent);color:#111;border-color:var(--accent);}
+  .section{display:none;padding:20px;}.section.active{display:block;}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin-bottom:14px;cursor:pointer;}
+  .card-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;}
+  .client-name{font-size:17px;font-weight:700;}
+  .row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);font-size:14px;}
+  .row:last-child{border-bottom:none;}
+  .row label{color:var(--muted);font-size:13px;}
+  .mono{font-family:'DM Mono',monospace;font-size:14px;font-weight:500;}
+  .green{color:var(--green);}.red{color:var(--red);}.yellow{color:var(--accent);}.blue{color:var(--blue);}.orange{color:var(--orange);}
+  .divider{border:none;border-top:1px dashed var(--border);margin:10px 0;}
+  .section-title{font-size:18px;font-weight:800;margin-bottom:18px;}
+  .form-group{margin-bottom:14px;}
+  .form-group label{display:block;font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;}
+  input,select{width:100%;background:var(--surface);border:1.5px solid var(--border);border-radius:10px;padding:13px 14px;color:var(--text);font-family:'Syne',sans-serif;font-size:15px;outline:none;-webkit-appearance:none;}
+  input:focus{border-color:var(--accent);}
+  input[type="number"]{font-family:'DM Mono',monospace;}
+  textarea{width:100%;background:var(--surface);border:1.5px solid var(--border);border-radius:10px;padding:13px 14px;color:var(--text);font-family:'Syne',sans-serif;font-size:15px;outline:none;resize:vertical;min-height:100px;line-height:1.6;}
+  textarea:focus{border-color:var(--accent);}
+  .toggle-group{display:flex;gap:8px;}
+  .toggle-btn{flex:1;padding:12px;border:2px solid var(--border);border-radius:10px;background:transparent;color:var(--muted);font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;}
+  .toggle-btn.sel-green{border-color:var(--green);color:var(--green);background:rgba(76,175,125,0.1);}
+  .toggle-btn.sel-aym{border-color:var(--orange);color:var(--orange);background:rgba(240,160,64,0.1);}
+  .btn{width:100%;padding:15px;border:none;border-radius:12px;font-family:'Syne',sans-serif;font-size:15px;font-weight:700;cursor:pointer;margin-top:10px;}
+  .btn-primary{background:var(--accent);color:#111;}
+  .btn-secondary{background:var(--surface);color:var(--text);border:1.5px solid var(--border);}
+  .btn-danger{background:var(--red);color:#fff;}
+  .btn-green{background:var(--green);color:#fff;}
+  .depense-item{display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid var(--border);}
+  .depense-item:last-child{border-bottom:none;}
+  .depense-tag{font-size:11px;font-weight:700;padding:2px 7px;border-radius:5px;flex-shrink:0;}
+  .tag-materiel{background:rgba(240,160,64,0.15);color:var(--orange);}
+  .tag-mo{background:rgba(91,156,246,0.15);color:var(--blue);}
+  .depense-desc{flex:1;font-size:13px;}
+  .depense-mnt{font-family:'DM Mono',monospace;font-size:13px;color:var(--red);flex-shrink:0;}
+  .del-btn{background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer;padding:2px 6px;flex-shrink:0;}
+  .add-dep-grid{display:grid;grid-template-columns:1fr 90px;gap:8px;margin-top:10px;}
+  .add-dep-grid input{padding:11px 12px;font-size:14px;}
+  .type-toggle{display:flex;gap:6px;margin-top:8px;}
+  .type-btn{flex:1;padding:10px;border:2px solid var(--border);border-radius:9px;background:transparent;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;color:var(--muted);}
+  .type-btn.sel-materiel{border-color:var(--orange);color:var(--orange);background:rgba(240,160,64,0.1);}
+  .type-btn.sel-mo{border-color:var(--blue);color:var(--blue);background:rgba(91,156,246,0.1);}
+  .add-dep-btn{width:100%;margin-top:8px;padding:11px;background:var(--accent);border:none;border-radius:10px;color:#111;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;cursor:pointer;}
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:200;overflow-y:auto;padding:20px;}
+  .modal-overlay.open{display:block;}
+  .modal{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:24px;max-width:500px;margin:30px auto 60px;position:relative;}
+  .modal h2{font-size:18px;font-weight:800;margin-bottom:20px;padding-right:40px;}
+  .close-btn{position:absolute;top:20px;right:20px;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:32px;height:32px;font-size:18px;cursor:pointer;color:var(--text);display:flex;align-items:center;justify-content:center;font-weight:700;}
+  .notes-preview{margin-top:10px;padding:10px 12px;background:var(--surface);border-radius:8px;border-left:3px solid var(--accent);font-size:13px;color:var(--text);line-height:1.5;white-space:pre-wrap;}
+  .arrow-box-big{background:var(--surface);border:2px solid var(--accent);border-radius:10px;padding:14px;margin-bottom:16px;font-size:14px;font-weight:700;line-height:1.6;}
+  .arrow-box-big strong{color:var(--accent);}
+  .arrow-box{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-top:12px;font-size:13px;line-height:1.6;}
+  .arrow-box strong{color:var(--accent);}
+  .tag-date{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;}
+  .empty-state{text-align:center;color:var(--muted);padding:40px 0;font-size:14px;}
+  .empty-state .icon{font-size:36px;margin-bottom:10px;}
+  .sub-label{font-size:11px;color:var(--muted);margin-top:4px;}
+  .especes-badge{font-size:11px;font-weight:800;color:var(--accent);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px;padding:4px 0;}
+  .check-row{display:flex;align-items:center;gap:10px;margin-top:8px;padding:10px 12px;background:var(--surface);border-radius:10px;border:1px solid var(--border);}
+  .check-row input[type="checkbox"]{width:22px;height:22px;cursor:pointer;flex-shrink:0;-webkit-appearance:checkbox;appearance:checkbox;}
+  .check-row span{font-size:13px;font-weight:600;color:var(--text);}
+  .perf-box{margin-top:10px;padding:12px;background:var(--surface);border-radius:10px;border:1px solid var(--border);}
+  .perf-box label{font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:6px;}
+  .perf-input-row{display:flex;gap:8px;align-items:center;}
+  .perf-input-row input{width:80px;padding:8px 10px;font-size:14px;flex-shrink:0;}
+  .perf-result{margin-top:10px;padding:10px;border-radius:8px;font-size:13px;font-weight:700;text-align:center;}
+  .perf-ok{background:rgba(76,175,125,0.15);border:1px solid var(--green);color:var(--green);}
+  .perf-bad{background:rgba(224,92,58,0.15);border:1px solid var(--red);color:var(--red);}
+  .demande-card{background:var(--card);border-left:4px solid var(--green);border-radius:var(--radius);padding:16px;margin-bottom:12px;}
+  .demande-card.orange{border-left-color:var(--orange);}
+  .demande-card.rouge{border-left-color:var(--red);}
+  .demande-card.rappel{border-left-color:var(--blue);border:2px solid var(--blue);}
+  .demande-nom{font-size:16px;font-weight:700;}
+  .demande-desc{font-size:13px;color:var(--muted);margin-top:6px;line-height:1.5;}
+  .demande-meta{display:flex;justify-content:space-between;align-items:center;margin-top:10px;}
+  .demande-tel{font-size:12px;color:var(--blue);}
+  .badge-urgence{font-size:10px;font-weight:800;padding:2px 8px;border-radius:5px;}
+  .badge-vert{background:rgba(76,175,125,0.2);color:var(--green);}
+  .badge-orange{background:rgba(240,160,64,0.2);color:var(--orange);}
+  .badge-rouge{background:rgba(224,92,58,0.2);color:var(--red);}
+  .badge-rappel{background:rgba(91,156,246,0.2);color:var(--blue);}
+  .status-badge{font-size:11px;font-weight:800;padding:4px 10px;border-radius:6px;display:inline-block;margin-bottom:8px;}
+  .status-validation{background:rgba(240,192,64,0.15);color:var(--accent);border:1px solid var(--accent);}
+  .btn-suppr-dem{width:100%;margin-top:8px;padding:12px;background:rgba(224,92,58,0.15);border:1px solid var(--red);border-radius:10px;color:var(--red);font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;}
+  .mois-block{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:16px;}
+  .mois-block h3{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;}
+  .mois-table{width:100%;border-collapse:collapse;}
+  .mois-table th{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;padding:4px 6px;text-align:left;border-bottom:1px solid var(--border);}
+  .mois-table td{font-size:12px;padding:7px 6px;border-bottom:1px solid var(--border);font-family:'DM Mono',monospace;}
+  .mois-table tr:last-child td{border-bottom:none;}
+  .mois-table .mois-label{font-family:'Syne',sans-serif;font-size:11px;font-weight:600;color:var(--text);}
+  .mo-block{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:16px;}
+  .mo-block h3{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;}
+  .mo-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px;}
+  .mo-row:last-child{border-bottom:none;}
+</style>
+</head>
+<body>
+<header>
+  <h1>Mes Chantiers <span>Solo</span></h1>
+  <div class="sync-status" id="sync-status">Connexion...</div>
+  <nav>
+    <button class="active" onclick="showSection('liste')">Liste</button>
+    <button onclick="showSection('nouveau')">+ Nouveau</button>
+    <button onclick="showSection('bilan')">Bilan</button>
+    <button onclick="showSection('demandes')">Demandes</button>
+  </nav>
+</header>
+
+<div id="liste" class="section active">
+  <p class="section-title">Chantiers en cours</p>
+  <div id="chantiers-list"></div>
+</div>
+
+<div id="nouveau" class="section">
+  <p class="section-title">Nouveau chantier</p>
+  <div class="card" style="cursor:default">
+    <div class="form-group"><label>Nom du client</label><input type="text" id="new-client" placeholder="Ex: Dupont Jean" /></div>
+    <div class="form-group"><label>Montant du devis (euros)</label><input type="number" id="new-devis" placeholder="0.00" step="0.01" min="0" /></div>
+    <div class="form-group">
+      <label>Chantier declare ?</label>
+      <div class="toggle-group">
+        <button class="toggle-btn sel-green" id="btn-declare-oui" onclick="setDeclare(true)">Oui - URSSAF 24%</button>
+        <button class="toggle-btn" id="btn-declare-non" onclick="setDeclare(false)">Non - En especes</button>
+      </div>
+    </div>
+    <div class="form-group"><label>Date de demarrage <span style="color:var(--red)">*</span></label><input type="date" id="new-date" required /></div>
+    <button class="btn btn-primary" onclick="ajouterChantier()">Creer le chantier</button>
+  </div>
+</div>
+
+<div id="bilan" class="section">
+  <p class="section-title">Bilan global</p>
+  <div id="bilan-content"></div>
+  <button class="btn btn-green" onclick="exporterExcel()">Telecharger Excel</button>
+</div>
+
+<div id="demandes" class="section">
+  <p class="section-title">Demandes clients</p>
+  <div class="card" style="margin-bottom:20px;cursor:default">
+    <div class="form-group"><label>Prenom / Nom (optionnel)</label><input type="text" id="dem-nom" placeholder="Ex: Marie Dupont" /></div>
+    <div class="form-group"><label>Telephone (optionnel)</label><input type="tel" id="dem-tel" placeholder="Ex: 06 12 34 56 78" /></div>
+    <div class="form-group"><label>Ville / Lieu (optionnel)</label><input type="text" id="dem-lieu" placeholder="Ex: Lyon 3e" /></div>
+    <div class="form-group"><label>Description de la demande</label><textarea id="dem-desc" placeholder="Ex: Renovation salle de bain..."></textarea></div>
+    <button class="btn btn-primary" onclick="ajouterDemande()">Ajouter la demande</button>
+  </div>
+  <div id="demandes-list"></div>
+</div>
+
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <button class="close-btn" onclick="fermerModal()">x</button>
+    <h2 id="modal-title">Chantier</h2>
+    <div class="form-group"><label>Client</label><input type="text" id="edit-client" /></div>
+    <div class="form-group"><label>Montant devis (euros)</label><input type="number" id="edit-devis" step="0.01" /></div>
+    <div class="form-group"><label>Date de demarrage</label><input type="date" id="edit-date" /></div>
+    <div class="form-group">
+      <label>Chantier declare ?</label>
+      <div class="toggle-group">
+        <button class="toggle-btn" id="edit-btn-declare-oui" onclick="setEditDeclare(true)">Oui - URSSAF 24%</button>
+        <button class="toggle-btn" id="edit-btn-declare-non" onclick="setEditDeclare(false)">Non - En especes</button>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Depenses</label>
+      <div id="edit-depenses-list"></div>
+      <div style="margin-top:12px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;">
+        <p style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;margin-bottom:8px;">Ajouter une depense</p>
+        <div class="add-dep-grid">
+          <input type="text" id="dep-desc" placeholder="Description / Nom du gars" />
+          <input type="number" id="dep-mnt" placeholder="euros" step="0.01" min="0" />
+        </div>
+        <div class="type-toggle">
+          <button class="type-btn" id="type-btn-materiel" onclick="setType('materiel')">Materiel</button>
+          <button class="type-btn" id="type-btn-mo" onclick="setType('mo')">Main d'oeuvre</button>
+        </div>
+        <button class="add-dep-btn" onclick="ajouterDepense()">+ Ajouter</button>
+      </div>
+    </div>
+    <div class="form-group"><label>Notes libres</label><textarea id="edit-notes" placeholder="Materiaux a commander, choses a ne pas oublier..."></textarea></div>
+    <button class="btn btn-primary" onclick="sauvegarderChantier()">Sauvegarder</button>
+    <button class="btn btn-secondary" onclick="fermerModal()">Annuler</button>
+    <button class="btn btn-danger" onclick="supprimerChantier()">Supprimer ce chantier</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="demande-modal-overlay">
+  <div class="modal">
+    <button class="close-btn" onclick="fermerDemande()">x</button>
+    <h2>Modifier la demande</h2>
+    <div class="form-group"><label>Prenom / Nom</label><input type="text" id="dem-edit-nom" /></div>
+    <div class="form-group"><label>Telephone</label><input type="tel" id="dem-edit-tel" /></div>
+    <div class="form-group"><label>Ville / Lieu</label><input type="text" id="dem-edit-lieu" /></div>
+    <div class="form-group"><label>Description</label><textarea id="dem-edit-desc"></textarea></div>
+    <button class="btn btn-primary" onclick="sauvegarderDemande()">Sauvegarder</button>
+    <button class="btn btn-secondary" onclick="fermerDemande()">Annuler</button>
+    <button class="btn btn-danger" onclick="supprimerDemande()">Supprimer</button>
+  </div>
+</div>
+
+<script>
+var BIN_ID = '6a4359f7f5f4af5e2945aabb';
+var API_KEY = '$2a$10$NRRQdixtQ/NsijZcDxQ47OYwm3YGBJXnv56wrj6SZJOokRbWEhRa6';
+var API_URL = 'https://api.jsonbin.io/v3/b/' + BIN_ID;
+var URSSAF_TAUX = 0.24;
+var OBJECTIF_JOUR = 270;
+var MOIS_FR = ['Jan','Fev','Mar','Avr','Mai','Juin','Juil','Aout','Sep','Oct','Nov','Dec'];
+
+var chantiers = [];
+var demandes = [];
+var editIndex = null;
+var demandeEditIndex = null;
+var depType = null;
+var newDeclare = true;
+var editDeclare = true;
+
+function fmt(n){return Number(n).toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2})+' euros';}
+function fmtShort(n){return Number(n).toLocaleString('fr-FR',{minimumFractionDigits:0,maximumFractionDigits:0})+' e';}
+function today(){return new Date().toISOString().split('T')[0];}
+function fmtDate(d){if(!d)return '';var p=d.split('-');return p.length===3?p[2]+'/'+p[1]+'/'+p[0]:d;}
+function setStatus(msg,cls){var el=document.getElementById('sync-status');el.textContent=msg;el.className='sync-status '+cls;}
+
+function chargerDonnees(){
+  setStatus('Chargement...','sync-loading');
+  return fetch(API_URL+'/latest',{headers:{'X-Access-Key':API_KEY}})
+    .then(function(r){return r.json();})
+    .then(function(d){
+      chantiers=d.record.chantiers||[];
+      demandes=d.record.demandes||[];
+      setStatus('Synchronise','sync-ok');
+      renderListe();
+    })
+    .catch(function(){setStatus('Erreur de connexion','sync-error');});
+}
+
+function sauverEnLigne(){
+  setStatus('Sauvegarde...','sync-loading');
+  return fetch(API_URL+'/latest',{headers:{'X-Access-Key':API_KEY}})
+    .then(function(r){return r.json();})
+    .then(function(d){
+      var rec=d.record;
+      rec.chantiers=chantiers;
+      rec.demandes=demandes;
+      return fetch(API_URL,{method:'PUT',headers:{'Content-Type':'application/json','X-Access-Key':API_KEY},body:JSON.stringify(rec)});
+    })
+    .then(function(){setStatus('Synchronise','sync-ok');})
+    .catch(function(){setStatus('Erreur sauvegarde','sync-error');});
+}
+
+function calcChantier(c){
+  var devis=parseFloat(c.devis)||0;
+  var declare=c.declare!==false;
+  var urssaf=declare?devis*URSSAF_TAUX:0;
+  var net=devis-urssaf;
+  var dep=c.depenses||[];
+  var depMateriel=dep.filter(function(d){return d.type!=='mo';}).reduce(function(s,d){return s+(parseFloat(d.mnt)||0);},0);
+  var depMO=dep.filter(function(d){return d.type==='mo';}).reduce(function(s,d){return s+(parseFloat(d.mnt)||0);},0);
+  var gainNet=net-depMateriel-depMO;
+  return {devis:devis,urssaf:urssaf,declare:declare,net:net,depMateriel:depMateriel,depMO:depMO,gainNet:gainNet};
+}
+
+function showSection(id){
+  document.querySelectorAll('.section').forEach(function(s){s.classList.remove('active');});
+  document.querySelectorAll('nav button').forEach(function(b){b.classList.remove('active');});
+  document.getElementById(id).classList.add('active');
+  ['liste','nouveau','bilan','demandes'].forEach(function(s,i){if(s===id)document.querySelectorAll('nav button')[i].classList.add('active');});
+  if(id==='liste') chargerDonnees();
+  if(id==='bilan') chargerDonnees().then(function(){renderBilan();});
+  if(id==='demandes') chargerDonnees().then(function(){renderDemandes();});
+}
+
+function setDeclare(val){newDeclare=val;document.getElementById('btn-declare-oui').className='toggle-btn'+(val?' sel-green':'');document.getElementById('btn-declare-non').className='toggle-btn'+(!val?' sel-aym':'');}
+function setEditDeclare(val){editDeclare=val;document.getElementById('edit-btn-declare-oui').className='toggle-btn'+(val?' sel-green':'');document.getElementById('edit-btn-declare-non').className='toggle-btn'+(!val?' sel-aym':'');}
+function setType(t){depType=t;document.getElementById('type-btn-materiel').className='type-btn'+(t==='materiel'?' sel-materiel':'');document.getElementById('type-btn-mo').className='type-btn'+(t==='mo'?' sel-mo':'');}
+
+function toggleVirement(i,checked){chantiers[i].virement=checked;sauverEnLigne().then(function(){renderBilan();});}
+function toggleLivre(i,checked){chantiers[i].livre=checked;sauverEnLigne().then(function(){renderBilan();renderListe();});}
+function updateJours(i,val){chantiers[i].jours=parseInt(val)||0;sauverEnLigne().then(function(){renderBilan();});}
+function toggleDepPaye(ci,di,checked){chantiers[ci].depenses[di].paye=checked;sauverEnLigne().then(function(){renderBilan();});}
+
+function renderListe(){
+  var container=document.getElementById('chantiers-list');
+  var actifs=chantiers.filter(function(c){return !c.livre;});
+  actifs.sort(function(a,b){return new Date(b.date)-new Date(a.date);});
+  if(!actifs.length){container.innerHTML='<div class="empty-state"><div class="icon">🏗️</div>Aucun chantier en cours.</div>';return;}
+  container.innerHTML=actifs.map(function(c){
+    var ri=chantiers.indexOf(c);
+    var r=calcChantier(c);
+    var urssafVal=r.declare?('-'+fmt(r.urssaf)):'<span style="color:var(--accent);font-weight:800">EN ESPECES</span>';
+    var notesHtml=c.notes&&c.notes.trim()?'<div class="notes-preview">📝 '+c.notes.trim()+'</div>':'';
+    return '<div class="card" onclick="ouvrirModal('+ri+')">' +
+      (r.declare?'':'<div class="especes-badge">EN ESPECES</div>') +
+      '<div class="card-header"><div><div class="client-name">'+c.client+'</div><div class="tag-date">Demarrage : '+fmtDate(c.date)+'</div></div></div>' +
+      '<div class="row"><label>Devis</label><span class="mono yellow">'+fmt(r.devis)+'</span></div>' +
+      '<div class="row"><label>'+(r.declare?'URSSAF (24%)':'EN ESPECES')+'</label><span class="mono red">'+urssafVal+'</span></div>' +
+      '<div class="row"><label>Dep. Materiel</label><span class="mono red">-'+fmt(r.depMateriel)+'</span></div>' +
+      '<div class="row"><label>Main d\'oeuvre</label><span class="mono red">-'+fmt(r.depMO)+'</span></div>' +
+      '<hr class="divider">' +
+      '<div class="row"><label><b>Gain net</b></label><span class="mono '+(r.gainNet>=0?'green':'red')+'"><b>'+fmt(r.gainNet)+'</b></span></div>' +
+      notesHtml+'</div>';
+  }).join('');
+}
+
+function ajouterChantier(){
+  var client=document.getElementById('new-client').value.trim();
+  var devis=document.getElementById('new-devis').value;
+  var date=document.getElementById('new-date').value;
+  if(!client||!devis){alert('Remplis le nom et le montant.');return;}
+  if(!date){alert('La date de demarrage est obligatoire.');return;}
+  chantiers.push({client:client,devis:parseFloat(devis),date:date,declare:newDeclare,virement:false,livre:false,jours:0,notes:'',depenses:[]});
+  sauverEnLigne().then(function(){
+    document.getElementById('new-client').value='';document.getElementById('new-devis').value='';document.getElementById('new-date').value='';
+    newDeclare=true;
+    document.getElementById('btn-declare-oui').className='toggle-btn sel-green';document.getElementById('btn-declare-non').className='toggle-btn';
+    alert('Chantier cree !');showSection('liste');
+  });
+}
+
+function ouvrirModal(i){
+  editIndex=i;depType=null;
+  var c=chantiers[i];
+  document.getElementById('modal-title').textContent=c.client;
+  document.getElementById('edit-client').value=c.client;
+  document.getElementById('edit-devis').value=c.devis;
+  document.getElementById('edit-date').value=c.date||'';
+  document.getElementById('edit-notes').value=c.notes||'';
+  document.getElementById('dep-desc').value='';document.getElementById('dep-mnt').value='';
+  document.getElementById('type-btn-materiel').className='type-btn';document.getElementById('type-btn-mo').className='type-btn';
+  setEditDeclare(c.declare!==false);
+  renderDepensesModal();
+  document.getElementById('modal-overlay').classList.add('open');
+  document.getElementById('modal-overlay').scrollTop=0;
+}
+function fermerModal(){document.getElementById('modal-overlay').classList.remove('open');editIndex=null;}
+function renderDepensesModal(){
+  var list=document.getElementById('edit-depenses-list');
+  var dep=(chantiers[editIndex]&&chantiers[editIndex].depenses)||[];
+  if(!dep.length){list.innerHTML='<p style="color:var(--muted);font-size:13px;padding:6px 0;">Aucune depense</p>';return;}
+  list.innerHTML=dep.map(function(d,i){
+    var tagClass=d.type==='mo'?'tag-mo':'tag-materiel';
+    var tagLabel=d.type==='mo'?'MO':'Materiel';
+    return '<div class="depense-item"><span class="depense-tag '+tagClass+'">'+tagLabel+'</span><span class="depense-desc">'+d.desc+'</span><span class="depense-mnt">-'+fmt(d.mnt)+'</span><button class="del-btn" onclick="supprimerDepense('+i+')">x</button></div>';
+  }).join('');
+}
+function ajouterDepense(){
+  var desc=document.getElementById('dep-desc').value.trim()||'Depense';
+  var mnt=parseFloat(document.getElementById('dep-mnt').value);
+  if(!mnt||mnt<=0){alert('Entre un montant valide.');return;}
+  if(!depType){alert('Choisis le type : materiel ou main d\'oeuvre.');return;}
+  chantiers[editIndex].depenses.push({desc:desc,mnt:mnt,type:depType,paye:false});
+  sauverEnLigne().then(function(){document.getElementById('dep-desc').value='';document.getElementById('dep-mnt').value='';depType=null;document.getElementById('type-btn-materiel').className='type-btn';document.getElementById('type-btn-mo').className='type-btn';renderDepensesModal();});
+}
+function supprimerDepense(i){chantiers[editIndex].depenses.splice(i,1);sauverEnLigne().then(function(){renderDepensesModal();});}
+function sauvegarderChantier(){
+  var client=document.getElementById('edit-client').value.trim();
+  var devis=parseFloat(document.getElementById('edit-devis').value);
+  if(!client||!devis){alert('Donnees incompletes.');return;}
+  chantiers[editIndex].client=client;chantiers[editIndex].devis=devis;
+  chantiers[editIndex].date=document.getElementById('edit-date').value;
+  chantiers[editIndex].declare=editDeclare;
+  chantiers[editIndex].notes=document.getElementById('edit-notes').value;
+  sauverEnLigne().then(function(){fermerModal();renderListe();});
+}
+function supprimerChantier(){
+  if(!confirm('Supprimer ce chantier ?'))return;
+  chantiers.splice(editIndex,1);
+  sauverEnLigne().then(function(){fermerModal();renderListe();});
+}
+
+function joursDepuis(d){var dd=new Date(d);var now=new Date();return Math.floor((now-dd)/(1000*60*60*24));}
+
+function ajouterDemande(){
+  var nom=document.getElementById('dem-nom').value.trim();
+  var tel=document.getElementById('dem-tel').value.trim();
+  var lieu=document.getElementById('dem-lieu').value.trim();
+  var desc=document.getElementById('dem-desc').value.trim();
+  if(!desc){alert('Entre au moins une description.');return;}
+  demandes.push({nom:nom,tel:tel,lieu:lieu,desc:desc,date:today(),traite:false,rappel:false,devisValide:false});
+  sauverEnLigne().then(function(){document.getElementById('dem-nom').value='';document.getElementById('dem-tel').value='';document.getElementById('dem-lieu').value='';document.getElementById('dem-desc').value='';renderDemandes();alert('Demande ajoutee !');});
+}
+function toggleDemandeTraite(i,checked){demandes[i].traite=checked;sauverEnLigne().then(function(){renderDemandes();});}
+function toggleRappel(i,checked){demandes[i].rappel=checked;sauverEnLigne().then(function(){renderDemandes();});}
+function toggleDevisValide(i,checked){
+  if(checked){
+    if(confirm('Creer automatiquement un chantier ?')){
+      var d=demandes[i];
+      var notes='Demande origine :\n'+(d.desc||'');
+      if(d.lieu) notes+='\nLieu : '+d.lieu;
+      if(d.tel) notes+='\nTel : '+d.tel;
+      chantiers.push({client:d.nom||'Client demande',devis:0,date:today(),declare:true,virement:false,livre:false,jours:0,notes:notes,depenses:[]});
+      demandes.splice(i,1);
+      sauverEnLigne().then(function(){renderDemandes();alert('Chantier cree !');showSection('liste');});
+    }
+  } else {demandes[i].devisValide=false;sauverEnLigne().then(function(){renderDemandes();});}
+}
+function supprimerDemandeDirecte(i){if(!confirm('Supprimer ?'))return;demandes.splice(i,1);sauverEnLigne().then(function(){renderDemandes();});}
+
+function renderDemandes(){
+  var container=document.getElementById('demandes-list');
+  if(!demandes.length){container.innerHTML='<div class="empty-state"><div class="icon">📞</div>Aucune demande.</div>';return;}
+  var liste=demandes.slice().sort(function(a,b){if(a.rappel&&!b.rappel)return -1;if(!a.rappel&&b.rappel)return 1;return new Date(a.date)-new Date(b.date);});
+  container.innerHTML=liste.map(function(d){
+    var ri=demandes.indexOf(d);
+    var jours=joursDepuis(d.date);
+    var badgeCls=d.rappel?'badge-rappel':jours<=3?'badge-vert':jours<=7?'badge-orange':'badge-rouge';
+    var joursLabel=d.rappel?'A RAPPELER':jours===0?'Aujourd\'hui':jours===1?'Hier':jours+' jours';
+    var cardCls=d.rappel?'demande-card rappel':jours<=3?'demande-card':jours<=7?'demande-card orange':'demande-card rouge';
+    return '<div class="'+cardCls+'">'+(d.traite?'<div style="margin-bottom:8px"><span class="status-badge status-validation">EN COURS DE VALIDATION</span></div>':'')+
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start"><div class="demande-nom">'+(d.nom||'Client inconnu')+'</div><span class="badge-urgence '+badgeCls+'">'+joursLabel+'</span></div>'+
+      (d.lieu?'<div style="font-size:12px;color:var(--muted);margin-top:3px;">📍 '+d.lieu+'</div>':'')+
+      '<div class="demande-desc">'+d.desc+'</div>'+
+      '<div class="demande-meta">'+(d.tel?'<div class="demande-tel">📞 '+d.tel+'</div>':'<div></div>')+'<div class="tag-date">'+fmtDate(d.date)+'</div></div>'+
+      '<div class="check-row" onclick="event.stopPropagation()"><input type="checkbox" '+(d.traite?'checked':'')+' onchange="toggleDemandeTraite('+ri+',this.checked)" /><span>Demande traitee (en cours de validation)</span></div>'+
+      '<div class="check-row" onclick="event.stopPropagation()"><input type="checkbox" '+(d.rappel?'checked':'')+' onchange="toggleRappel('+ri+',this.checked)" /><span>A rappeler - remonte en haut</span></div>'+
+      '<div class="check-row" onclick="event.stopPropagation()"><input type="checkbox" '+(d.devisValide?'checked':'')+' onchange="toggleDevisValide('+ri+',this.checked)" /><span>Devis valide - creer le chantier</span></div>'+
+      '<button class="btn-suppr-dem" onclick="event.stopPropagation();supprimerDemandeDirecte('+ri+')">Supprimer cette demande</button>'+
+    '</div>';
+  }).join('');
+}
+function ouvrirDemande(i){demandeEditIndex=i;var d=demandes[i];document.getElementById('dem-edit-nom').value=d.nom||'';document.getElementById('dem-edit-tel').value=d.tel||'';document.getElementById('dem-edit-lieu').value=d.lieu||'';document.getElementById('dem-edit-desc').value=d.desc||'';document.getElementById('demande-modal-overlay').classList.add('open');}
+function fermerDemande(){document.getElementById('demande-modal-overlay').classList.remove('open');demandeEditIndex=null;}
+function sauvegarderDemande(){demandes[demandeEditIndex].nom=document.getElementById('dem-edit-nom').value.trim();demandes[demandeEditIndex].tel=document.getElementById('dem-edit-tel').value.trim();demandes[demandeEditIndex].lieu=document.getElementById('dem-edit-lieu').value.trim();demandes[demandeEditIndex].desc=document.getElementById('dem-edit-desc').value.trim();sauverEnLigne().then(function(){fermerDemande();renderDemandes();});}
+function supprimerDemande(){if(!confirm('Supprimer ?'))return;demandes.splice(demandeEditIndex,1);sauverEnLigne().then(function(){fermerDemande();renderDemandes();});}
+
+function renderBilan(){
+  var container=document.getElementById('bilan-content');
+  if(!chantiers.length){container.innerHTML='<div class="empty-state"><div class="icon">📊</div>Aucune donnee.</div>';return;}
+
+  // Recap main d'oeuvre a payer : uniquement chantiers TERMINES, depenses MO non payees
+  var moParNom={};
+  chantiers.forEach(function(c){
+    if(!c.livre) return;
+    (c.depenses||[]).forEach(function(d){
+      if(d.type==='mo'&&!d.paye){
+        var nom=d.desc||'Inconnu';
+        moParNom[nom]=(moParNom[nom]||0)+(parseFloat(d.mnt)||0);
+      }
+    });
+  });
+  var moKeys=Object.keys(moParNom);
+  var moHtml='';
+  if(moKeys.length){
+    moHtml='<div class="mo-block"><h3>A verser - Main d\'oeuvre</h3>'+
+      moKeys.map(function(nom){
+        return '<div class="mo-row"><span>'+nom+'</span><span class="mono red">'+fmt(moParNom[nom])+'</span></div>';
+      }).join('')+
+    '</div>';
+  } else {
+    moHtml='<div class="mo-block"><h3>A verser - Main d\'oeuvre</h3><div class="mo-row" style="color:var(--muted)">Rien a verser actuellement</div></div>';
+  }
+
+  // Tableau 6 derniers mois
+  var now=new Date();
+  var moisData=[];
+  for(var m=5;m>=0;m--){
+    var d=new Date(now.getFullYear(),now.getMonth()-m,1);
+    moisData.push({annee:d.getFullYear(),mois:d.getMonth(),label:MOIS_FR[d.getMonth()]+' '+d.getFullYear(),ca:0,urssaf:0,gain:0});
+  }
+  chantiers.forEach(function(c){
+    if(!c.date) return;
+    var cd=new Date(c.date);
+    moisData.forEach(function(md){
+      if(md.annee===cd.getFullYear()&&md.mois===cd.getMonth()){
+        var r=calcChantier(c);
+        md.ca+=r.devis;
+        md.urssaf+=r.urssaf;
+        md.gain+=r.gainNet;
+      }
+    });
+  });
+  var tableRows=moisData.map(function(md){
+    var has=md.ca>0;
+    return '<tr'+(has?'':' style="opacity:0.35"')+'>' +
+      '<td class="mois-label">'+md.label+'</td>' +
+      '<td style="color:var(--accent)">'+fmtShort(md.ca)+'</td>' +
+      '<td style="color:var(--red)">'+fmtShort(md.urssaf)+'</td>' +
+      '<td style="color:var(--green);font-weight:700">'+fmtShort(md.gain)+'</td>' +
+    '</tr>';
+  }).join('');
+  var moisHtml=
+    '<div class="mois-block"><h3>6 derniers mois</h3>' +
+    '<table class="mois-table"><thead><tr><th>Mois</th><th>CA</th><th>URSSAF</th><th>Gain net</th></tr></thead>' +
+    '<tbody>'+tableRows+'</tbody></table></div>';
+
+  // Detail chantiers
+  var sorted=chantiers.slice().sort(function(a,b){return new Date(b.date)-new Date(a.date);});
+  var rows=sorted.map(function(c){
+    var i=chantiers.indexOf(c);
+    var r=calcChantier(c);
+    var urssafVal=c.declare!==false?('-'+fmt(r.urssaf)):'<span style="color:var(--accent);font-weight:800">EN ESPECES</span>';
+    var jours=parseInt(c.jours)||0;
+    var perfHtml='';
+    if(jours>0){var diff=r.gainNet-jours*OBJECTIF_JOUR;var pj=r.gainNet/jours;var cls=diff>=0?'perf-ok':'perf-bad';perfHtml='<div class="perf-result '+cls+'">'+(diff>=0?'BON':'INSUFFISANT')+' - '+fmt(pj)+' / jour'+(diff>=0?' (+'+fmt(diff)+')':' ('+fmt(diff)+')')+'</div>';}
+    var depHtml=(c.depenses||[]).filter(function(d){return d.type==='mo';}).map(function(d,di){
+      var realDi=c.depenses.indexOf(d);
+      return '<div class="check-row"><input type="checkbox" '+(d.paye?'checked':'')+' onchange="toggleDepPaye('+i+','+realDi+',this.checked)" onclick="event.stopPropagation()" /><span>'+d.desc+' - '+fmt(d.mnt)+' '+(d.paye?'(verse)':'(a verser)')+'</span></div>';
+    }).join('');
+    return '<div class="card" style="cursor:default'+(c.livre?';opacity:0.6;border-style:dashed':'')+'">' +
+      (c.declare===false?'<div class="especes-badge">EN ESPECES</div>':'') +
+      (c.livre?'<div style="font-size:11px;font-weight:800;color:var(--green);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">TERMINE</div>':'') +
+      '<div class="card-header"><div><div class="client-name">'+c.client+'</div><div class="tag-date">Demarrage : '+fmtDate(c.date)+'</div></div></div>' +
+      '<div class="row"><label>Devis</label><span class="mono yellow">'+fmt(r.devis)+'</span></div>' +
+      '<div class="row"><label>'+(c.declare!==false?'URSSAF 24%':'EN ESPECES')+'</label><span class="mono red">'+urssafVal+'</span></div>' +
+      '<div class="row"><label>Dep. Materiel</label><span class="mono red">-'+fmt(r.depMateriel)+'</span></div>' +
+      '<div class="row"><label>Main d\'oeuvre</label><span class="mono red">-'+fmt(r.depMO)+'</span></div>' +
+      '<hr class="divider">' +
+      '<div class="row"><label><b>Gain net</b></label><span class="mono '+(r.gainNet>=0?'green':'red')+'"><b>'+fmt(r.gainNet)+'</b></span></div>' +
+      depHtml +
+      '<div class="perf-box"><label>Nb de jours travailles</label><div class="perf-input-row"><input type="number" min="0" value="'+(c.jours||0)+'" onchange="updateJours('+i+',this.value)" onclick="event.stopPropagation()" style="width:80px" /><span style="font-size:12px;color:var(--muted);">jours - objectif '+OBJECTIF_JOUR+' euros/jour</span></div>'+perfHtml+'</div>' +
+      '<div class="check-row"><input type="checkbox" '+(c.livre?'checked':'')+' onchange="toggleLivre('+i+',this.checked)" onclick="event.stopPropagation()" /><span>Chantier termine</span></div>' +
+    '</div>';
+  }).join('');
+
+  container.innerHTML=moHtml+moisHtml+rows;
+}
+
+function exporterExcel(){
+  var BOM='\uFEFF';
+  var csv=BOM+'Client;Date demarrage;Declare;Termine;Jours;Devis;URSSAF;Dep.Materiel;Dep.MainOeuvre;Gain net;Notes\n';
+  chantiers.forEach(function(c){
+    var r=calcChantier(c);
+    csv+='"'+c.client+'";"'+fmtDate(c.date)+'"; "'+(c.declare!==false?'Oui':'Non')+'"; "'+(c.livre?'Oui':'Non')+'"; "'+(c.jours||0)+'"; "'+r.devis.toFixed(2)+'"; "'+r.urssaf.toFixed(2)+'"; "'+r.depMateriel.toFixed(2)+'"; "'+r.depMO.toFixed(2)+'"; "'+r.gainNet.toFixed(2)+'";"'+(c.notes||'')+'"\n';
+  });
+  var blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url;a.download='mes_chantiers_solo.csv';a.click();
+}
+
+chargerDonnees();
+</script>
+</body>
+</html>
