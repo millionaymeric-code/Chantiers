@@ -18,8 +18,8 @@
   header h1 span{color:var(--accent);}
   .sync-status{font-size:11px;margin-top:4px;font-family:'DM Mono',monospace;}
   .sync-ok{color:var(--green);}.sync-loading{color:var(--orange);}.sync-error{color:var(--red);}
-  nav{display:flex;gap:4px;margin-top:14px;}
-  nav button{flex:1;padding:8px 2px;border:1.5px solid var(--border);background:transparent;color:var(--muted);border-radius:10px;font-family:'Syne',sans-serif;font-size:11px;font-weight:600;cursor:pointer;}
+  nav{display:flex;gap:4px;margin-top:14px;flex-wrap:wrap;}
+  nav button{flex:1;min-width:60px;padding:8px 2px;border:1.5px solid var(--border);background:transparent;color:var(--muted);border-radius:10px;font-family:'Syne',sans-serif;font-size:11px;font-weight:600;cursor:pointer;}
   nav button.active{background:var(--accent);color:#111;border-color:var(--accent);}
   .section{display:none;padding:20px;}.section.active{display:block;}
   .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin-bottom:14px;cursor:pointer;}
@@ -40,7 +40,7 @@
   input,select{width:100%;background:var(--surface);border:1.5px solid var(--border);border-radius:10px;padding:13px 14px;color:var(--text);font-family:'Syne',sans-serif;font-size:15px;outline:none;-webkit-appearance:none;}
   input:focus{border-color:var(--accent);}
   input[type="number"]{font-family:'DM Mono',monospace;}
-  textarea{width:100%;background:var(--surface);border:1.5px solid var(--border);border-radius:10px;padding:13px 14px;color:var(--text);font-family:'Syne',sans-serif;font-size:15px;outline:none;resize:vertical;min-height:100px;line-height:1.6;}
+  textarea{width:100%;background:var(--surface);border:1.5px solid var(--border);border-radius:10px;padding:13px 14px;color:var(--text);font-family:'Syne',sans-serif;font-size:15px;outline:none;resize:vertical;min-height:80px;line-height:1.6;}
   textarea:focus{border-color:var(--accent);}
   .toggle-group{display:flex;gap:8px;}
   .toggle-btn{flex:1;padding:12px;border:2px solid var(--border);border-radius:10px;background:transparent;color:var(--muted);font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;}
@@ -73,8 +73,8 @@
   .modal h2{font-size:18px;font-weight:800;margin-bottom:20px;padding-right:40px;}
   .close-btn{position:absolute;top:20px;right:20px;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:32px;height:32px;font-size:18px;cursor:pointer;color:var(--text);display:flex;align-items:center;justify-content:center;font-weight:700;}
   .notes-preview{margin-top:10px;padding:10px 12px;background:var(--surface);border-radius:8px;border-left:3px solid var(--accent);font-size:13px;color:var(--text);line-height:1.5;white-space:pre-wrap;}
-  .arrow-box-big{background:var(--surface);border:2px solid var(--accent);border-radius:10px;padding:14px;margin-bottom:16px;font-size:15px;font-weight:700;line-height:1.6;text-align:center;}
-  .arrow-box-big strong{color:var(--accent);font-size:17px;}
+  .arrow-box-big{background:var(--surface);border:2px solid var(--accent);border-radius:10px;padding:14px;margin-bottom:16px;font-size:14px;font-weight:700;line-height:1.6;}
+  .arrow-box-big strong{color:var(--accent);}
   .arrow-box{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-top:12px;font-size:13px;line-height:1.6;}
   .arrow-box strong{color:var(--accent);}
   .tag-date{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;}
@@ -115,11 +115,10 @@
   .mois-table td{font-size:12px;padding:7px 6px;border-bottom:1px solid var(--border);font-family:'DM Mono',monospace;}
   .mois-table tr:last-child td{border-bottom:none;}
   .mois-table .mois-label{font-family:'Syne',sans-serif;font-size:11px;font-weight:600;color:var(--text);}
-  .person-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);}
-  .person-row:last-child{border-bottom:none;}
-  .person-label{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;}
-  .dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
-  .dot-fab{background:var(--blue);}.dot-aym{background:var(--orange);}
+  /* DEVIS */
+  .devis-card{background:var(--card);border:1px solid var(--accent);border-radius:var(--radius);padding:18px;margin-bottom:14px;cursor:pointer;}
+  .devis-preconisation{margin-top:10px;padding:12px;background:rgba(76,175,125,0.1);border:1px solid var(--green);border-radius:10px;font-size:13px;font-weight:700;color:var(--green);}
+  .preconisation-mini{margin-top:8px;padding:8px 12px;background:rgba(76,175,125,0.08);border:1px solid var(--green);border-radius:8px;font-size:12px;color:var(--green);font-weight:600;}
 </style>
 </head>
 <body>
@@ -129,6 +128,7 @@
   <nav>
     <button class="active" onclick="showSection('liste')">Liste</button>
     <button onclick="showSection('nouveau')">+ Nouveau</button>
+    <button onclick="showSection('devis')">Devis</button>
     <button onclick="showSection('bilan')">Bilan</button>
     <button onclick="showSection('demandes')">Demandes</button>
   </nav>
@@ -141,7 +141,7 @@
 
 <div id="nouveau" class="section">
   <p class="section-title">Nouveau chantier</p>
-  <div class="card">
+  <div class="card" style="cursor:default">
     <div class="form-group"><label>Nom du client</label><input type="text" id="new-client" placeholder="Ex: Dupont Jean" /></div>
     <div class="form-group"><label>Montant du devis (euros)</label><input type="number" id="new-devis" placeholder="0.00" step="0.01" min="0" /></div>
     <div class="form-group">
@@ -164,6 +164,12 @@
   </div>
 </div>
 
+<div id="devis" class="section">
+  <p class="section-title">Devis en cours</p>
+  <button class="btn btn-primary" style="margin-bottom:20px" onclick="ouvrirNouveauDevis()">+ Nouveau devis</button>
+  <div id="devis-list"></div>
+</div>
+
 <div id="bilan" class="section">
   <p class="section-title">Bilan global</p>
   <div id="bilan-content"></div>
@@ -172,7 +178,7 @@
 
 <div id="demandes" class="section">
   <p class="section-title">Demandes clients</p>
-  <div class="card" style="margin-bottom:20px;">
+  <div class="card" style="margin-bottom:20px;cursor:default">
     <div class="form-group"><label>Prenom / Nom (optionnel)</label><input type="text" id="dem-nom" placeholder="Ex: Marie Dupont" /></div>
     <div class="form-group"><label>Telephone (optionnel)</label><input type="tel" id="dem-tel" placeholder="Ex: 06 12 34 56 78" /></div>
     <div class="form-group"><label>Ville / Lieu (optionnel)</label><input type="text" id="dem-lieu" placeholder="Ex: Lyon 3e" /></div>
@@ -182,6 +188,7 @@
   <div id="demandes-list"></div>
 </div>
 
+<!-- MODAL CHANTIER -->
 <div class="modal-overlay" id="modal-overlay">
   <div class="modal">
     <button class="close-btn" onclick="fermerModal()">x</button>
@@ -226,6 +233,54 @@
   </div>
 </div>
 
+<!-- MODAL DEVIS -->
+<div class="modal-overlay" id="devis-modal-overlay">
+  <div class="modal">
+    <button class="close-btn" onclick="fermerDevisModal()">x</button>
+    <h2 id="devis-modal-title">Devis</h2>
+    <div class="form-group"><label>Nom du client</label><input type="text" id="dv-client" placeholder="Ex: Dupont Jean" /></div>
+    <div class="form-group"><label>Lieu du chantier</label><input type="text" id="dv-lieu" placeholder="Ex: Lyon 3e" /></div>
+    <div class="form-group"><label>Montant du devis (euros)</label><input type="number" id="dv-montant" placeholder="0.00" step="0.01" min="0" oninput="calcDevis()" /></div>
+    <div class="form-group">
+      <label>Responsable</label>
+      <div class="toggle-group">
+        <button class="toggle-btn" id="dv-btn-fab" onclick="setDvResp('Fabrice')">Fabrice</button>
+        <button class="toggle-btn" id="dv-btn-aym" onclick="setDvResp('Aymeric')">Aymeric</button>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Chantier declare ?</label>
+      <div class="toggle-group">
+        <button class="toggle-btn sel-green" id="dv-btn-declare-oui" onclick="setDvDeclare(true)">Oui - URSSAF 24%</button>
+        <button class="toggle-btn" id="dv-btn-declare-non" onclick="setDvDeclare(false)">Non - En especes</button>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Depenses prevues</label>
+      <div id="dv-depenses-list"></div>
+      <div style="margin-top:12px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;">
+        <p style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;margin-bottom:8px;">Ajouter une depense</p>
+        <div class="add-dep-grid">
+          <input type="text" id="dv-dep-desc" placeholder="Description" />
+          <input type="number" id="dv-dep-mnt" placeholder="euros" step="0.01" min="0" oninput="calcDevis()" />
+        </div>
+        <div class="who-toggle">
+          <button class="who-btn" id="dv-who-fab" onclick="setDvWho('Fabrice')">Fabrice</button>
+          <button class="who-btn" id="dv-who-aym" onclick="setDvWho('Aymeric')">Aymeric</button>
+        </div>
+        <button class="add-dep-btn" onclick="ajouterDepDevis()">+ Ajouter</button>
+      </div>
+    </div>
+    <div class="form-group"><label>Notes</label><textarea id="dv-notes" placeholder="Details, precisions..."></textarea></div>
+    <div id="dv-calcul" style="margin-top:10px;"></div>
+    <button class="btn btn-primary" onclick="sauvegarderDevis()">Sauvegarder le devis</button>
+    <button class="btn btn-green" style="margin-top:8px" onclick="validerDevis()">✓ Devis valide - Creer le chantier</button>
+    <button class="btn btn-secondary" onclick="fermerDevisModal()">Annuler</button>
+    <button class="btn btn-danger" id="dv-btn-suppr" onclick="supprimerDevis()" style="display:none">Supprimer ce devis</button>
+  </div>
+</div>
+
+<!-- MODAL DEMANDE -->
 <div class="modal-overlay" id="demande-modal-overlay">
   <div class="modal">
     <button class="close-btn" onclick="fermerDemande()">x</button>
@@ -246,17 +301,23 @@ var API_KEY = '$2a$10$NRRQdixtQ/NsijZcDxQ47OYwm3YGBJXnv56wrj6SZJOokRbWEhRa6';
 var API_URL = 'https://api.jsonbin.io/v3/b/' + BIN_ID;
 var URSSAF_TAUX = 0.24;
 var OBJECTIF_JOUR = 270;
+var OBJECTIF_MIN = 250;
 var MOIS_FR = ['Jan','Fev','Mar','Avr','Mai','Juin','Juil','Aout','Sep','Oct','Nov','Dec'];
 
 var chantiers = [];
 var demandes = [];
+var devisList = [];
 var editIndex = null;
 var demandeEditIndex = null;
+var devisEditIndex = null;
 var newResp = null;
 var editResp = null;
+var dvResp = null;
 var depWho = null;
+var dvWho = null;
 var newDeclare = true;
 var editDeclare = true;
+var dvDeclare = true;
 
 function fmt(n){return Number(n).toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2})+' euros';}
 function fmtShort(n){return Number(n).toLocaleString('fr-FR',{minimumFractionDigits:0,maximumFractionDigits:0})+' e';}
@@ -271,6 +332,7 @@ function chargerDonnees(){
     .then(function(d){
       chantiers=d.record.chantiers||[];
       demandes=d.record.demandes||[];
+      devisList=d.record.devis||[];
       setStatus('Synchronise','sync-ok');
       renderListe();
     })
@@ -285,6 +347,7 @@ function sauverEnLigne(){
       var rec=d.record;
       rec.chantiers=chantiers;
       rec.demandes=demandes;
+      rec.devis=devisList;
       return fetch(API_URL,{method:'PUT',headers:{'Content-Type':'application/json','X-Access-Key':API_KEY},body:JSON.stringify(rec)});
     })
     .then(function(){setStatus('Synchronise','sync-ok');})
@@ -307,29 +370,197 @@ function calcChantier(c){
   return {devis:devis,urssaf:urssaf,declare:declare,net:net,depFab:depFab,depAym:depAym,resultatNet:resultatNet,part:part,recoit_fab:recoit_fab,recoit_aym:recoit_aym,transfert:transfert};
 }
 
+function calcDevisData(dv){
+  var montant=parseFloat(dv.montant)||0;
+  var declare=dv.declare!==false;
+  var urssaf=declare?montant*URSSAF_TAUX:0;
+  var dep=dv.depenses||[];
+  var totalDep=dep.reduce(function(s,d){return s+(parseFloat(d.mnt)||0);},0);
+  var net=montant-urssaf-totalDep;
+  var gainChacun=net/2;
+  var joursMax=gainChacun>0?Math.floor(gainChacun/OBJECTIF_MIN):0;
+  return {montant:montant,urssaf:urssaf,totalDep:totalDep,net:net,gainChacun:gainChacun,joursMax:joursMax};
+}
+
 function showSection(id){
   document.querySelectorAll('.section').forEach(function(s){s.classList.remove('active');});
   document.querySelectorAll('nav button').forEach(function(b){b.classList.remove('active');});
   document.getElementById(id).classList.add('active');
-  ['liste','nouveau','bilan','demandes'].forEach(function(s,i){if(s===id)document.querySelectorAll('nav button')[i].classList.add('active');});
+  ['liste','nouveau','devis','bilan','demandes'].forEach(function(s,i){if(s===id)document.querySelectorAll('nav button')[i].classList.add('active');});
   if(id==='liste') chargerDonnees();
+  if(id==='devis') chargerDonnees().then(function(){renderDevisList();});
   if(id==='bilan') chargerDonnees().then(function(){renderBilan();});
   if(id==='demandes') chargerDonnees().then(function(){renderDemandes();});
 }
 
 function setResp(who){newResp=who;document.getElementById('btn-resp-fab').className='toggle-btn'+(who==='Fabrice'?' sel-fab':'');document.getElementById('btn-resp-aym').className='toggle-btn'+(who==='Aymeric'?' sel-aym':'');document.getElementById('resp-hint').textContent=who+' encaisse le devis et paie les charges';}
 function setEditResp(who){editResp=who;document.getElementById('edit-btn-fab').className='toggle-btn'+(who==='Fabrice'?' sel-fab':'');document.getElementById('edit-btn-aym').className='toggle-btn'+(who==='Aymeric'?' sel-aym':'');}
+function setDvResp(who){dvResp=who;document.getElementById('dv-btn-fab').className='toggle-btn'+(who==='Fabrice'?' sel-fab':'');document.getElementById('dv-btn-aym').className='toggle-btn'+(who==='Aymeric'?' sel-aym':'');calcDevis();}
 function setDeclare(val){newDeclare=val;document.getElementById('btn-declare-oui').className='toggle-btn'+(val?' sel-green':'');document.getElementById('btn-declare-non').className='toggle-btn'+(!val?' sel-aym':'');}
 function setEditDeclare(val){editDeclare=val;document.getElementById('edit-btn-declare-oui').className='toggle-btn'+(val?' sel-green':'');document.getElementById('edit-btn-declare-non').className='toggle-btn'+(!val?' sel-aym':'');}
+function setDvDeclare(val){dvDeclare=val;document.getElementById('dv-btn-declare-oui').className='toggle-btn'+(val?' sel-green':'');document.getElementById('dv-btn-declare-non').className='toggle-btn'+(!val?' sel-aym':'');calcDevis();}
 function setWho(who){depWho=who;document.getElementById('who-btn-fab').className='who-btn'+(who==='Fabrice'?' sel-fab':'');document.getElementById('who-btn-aym').className='who-btn'+(who==='Aymeric'?' sel-aym':'');}
+function setDvWho(who){dvWho=who;document.getElementById('dv-who-fab').className='who-btn'+(who==='Fabrice'?' sel-fab':'');document.getElementById('dv-who-aym').className='who-btn'+(who==='Aymeric'?' sel-aym':'');}
 function toggleVirement(i,checked){chantiers[i].virement=checked;sauverEnLigne().then(function(){renderBilan();});}
 function toggleLivre(i,checked){chantiers[i].livre=checked;sauverEnLigne().then(function(){renderBilan();renderListe();});}
 function updateJours(i,val){chantiers[i].jours=parseInt(val)||0;sauverEnLigne().then(function(){renderBilan();});}
 
+function calcDevis(){
+  var montant=parseFloat(document.getElementById('dv-montant').value)||0;
+  var declare=dvDeclare;
+  var urssaf=declare?montant*URSSAF_TAUX:0;
+  var dep=devisEditIndex!==null?(devisList[devisEditIndex].depenses||[]):[];
+  var totalDep=dep.reduce(function(s,d){return s+(parseFloat(d.mnt)||0);},0);
+  var net=montant-urssaf-totalDep;
+  var gainChacun=net/2;
+  var joursMax=gainChacun>0?Math.floor(gainChacun/OBJECTIF_MIN):0;
+  var html='<div class="devis-preconisation">' +
+    '<div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Calcul previsionnel</div>' +
+    '<div style="display:flex;justify-content:space-between;padding:4px 0"><span>Devis</span><span>'+fmt(montant)+'</span></div>' +
+    (declare?'<div style="display:flex;justify-content:space-between;padding:4px 0"><span>URSSAF 24%</span><span style="color:var(--red)">-'+fmt(urssaf)+'</span></div>':'') +
+    '<div style="display:flex;justify-content:space-between;padding:4px 0"><span>Depenses</span><span style="color:var(--red)">-'+fmt(totalDep)+'</span></div>' +
+    '<div style="display:flex;justify-content:space-between;padding:4px 0;border-top:1px dashed var(--border);margin-top:4px"><span><b>Gain chacun</b></span><span style="color:var(--green);font-weight:800">'+fmt(gainChacun)+'</span></div>' +
+    '<div style="margin-top:10px;padding:10px;background:rgba(0,0,0,0.2);border-radius:8px;font-size:13px">📅 Maximum <b>'+joursMax+' jour'+(joursMax>1?'s':'')+'</b> de travail pour avoir chacun minimum '+OBJECTIF_MIN+'€ net/jour</div>' +
+  '</div>';
+  document.getElementById('dv-calcul').innerHTML=html;
+}
+
+function renderDevisList(){
+  var container=document.getElementById('devis-list');
+  if(!devisList.length){container.innerHTML='<div class="empty-state"><div class="icon">📋</div>Aucun devis en cours.</div>';return;}
+  container.innerHTML=devisList.map(function(dv,i){
+    var r=calcDevisData(dv);
+    return '<div class="devis-card" onclick="ouvrirDevis('+i+')">' +
+      '<div class="card-header"><div><div class="client-name">'+dv.client+'</div>'+(dv.lieu?'<div class="tag-date">📍 '+dv.lieu+'</div>':'')+'</div><span style="font-size:11px;font-weight:800;color:var(--accent);padding:3px 9px;border:1px solid var(--accent);border-radius:6px">DEVIS</span></div>' +
+      '<div class="row"><label>Montant devis</label><span class="mono yellow">'+fmt(r.montant)+'</span></div>' +
+      (dv.declare!==false?'<div class="row"><label>URSSAF 24%</label><span class="mono red">-'+fmt(r.urssaf)+'</span></div>':'') +
+      '<div class="row"><label>Depenses prevues</label><span class="mono red">-'+fmt(r.totalDep)+'</span></div>' +
+      '<div class="row"><label><b>Gain chacun</b></label><span class="mono green"><b>'+fmt(r.gainChacun)+'</b></span></div>' +
+      '<div class="devis-preconisation" style="margin-top:10px">📅 Maximum <b>'+r.joursMax+' jour'+(r.joursMax>1?'s':'')+'</b> pour avoir chacun minimum '+OBJECTIF_MIN+'€ net/jour</div>' +
+    '</div>';
+  }).join('');
+}
+
+function ouvrirNouveauDevis(){
+  devisEditIndex=null;dvResp=null;dvDeclare=true;dvWho=null;
+  document.getElementById('devis-modal-title').textContent='Nouveau devis';
+  document.getElementById('dv-client').value='';
+  document.getElementById('dv-lieu').value='';
+  document.getElementById('dv-montant').value='';
+  document.getElementById('dv-notes').value='';
+  document.getElementById('dv-btn-fab').className='toggle-btn';
+  document.getElementById('dv-btn-aym').className='toggle-btn';
+  document.getElementById('dv-btn-declare-oui').className='toggle-btn sel-green';
+  document.getElementById('dv-btn-declare-non').className='toggle-btn';
+  document.getElementById('dv-who-fab').className='who-btn';
+  document.getElementById('dv-who-aym').className='who-btn';
+  document.getElementById('dv-btn-suppr').style.display='none';
+  document.getElementById('dv-depenses-list').innerHTML='<p style="color:var(--muted);font-size:13px;padding:6px 0;">Aucune depense</p>';
+  document.getElementById('dv-calcul').innerHTML='';
+  document.getElementById('dv-dep-desc').value='';
+  document.getElementById('dv-dep-mnt').value='';
+  document.getElementById('devis-modal-overlay').classList.add('open');
+  document.getElementById('devis-modal-overlay').scrollTop=0;
+}
+
+function ouvrirDevis(i){
+  devisEditIndex=i;dvWho=null;
+  var dv=devisList[i];
+  document.getElementById('devis-modal-title').textContent=dv.client;
+  document.getElementById('dv-client').value=dv.client||'';
+  document.getElementById('dv-lieu').value=dv.lieu||'';
+  document.getElementById('dv-montant').value=dv.montant||'';
+  document.getElementById('dv-notes').value=dv.notes||'';
+  dvDeclare=dv.declare!==false;
+  dvResp=dv.responsable||null;
+  document.getElementById('dv-btn-fab').className='toggle-btn'+(dvResp==='Fabrice'?' sel-fab':'');
+  document.getElementById('dv-btn-aym').className='toggle-btn'+(dvResp==='Aymeric'?' sel-aym':'');
+  document.getElementById('dv-btn-declare-oui').className='toggle-btn'+(dvDeclare?' sel-green':'');
+  document.getElementById('dv-btn-declare-non').className='toggle-btn'+(!dvDeclare?' sel-aym':'');
+  document.getElementById('dv-who-fab').className='who-btn';
+  document.getElementById('dv-who-aym').className='who-btn';
+  document.getElementById('dv-btn-suppr').style.display='block';
+  renderDepDevis();
+  calcDevis();
+  document.getElementById('devis-modal-overlay').classList.add('open');
+  document.getElementById('devis-modal-overlay').scrollTop=0;
+}
+
+function fermerDevisModal(){document.getElementById('devis-modal-overlay').classList.remove('open');devisEditIndex=null;}
+
+function renderDepDevis(){
+  var list=document.getElementById('dv-depenses-list');
+  var dv=devisEditIndex!==null?devisList[devisEditIndex]:null;
+  var dep=dv?(dv.depenses||[]):[];
+  if(!dep.length){list.innerHTML='<p style="color:var(--muted);font-size:13px;padding:6px 0;">Aucune depense</p>';return;}
+  list.innerHTML=dep.map(function(d,i){
+    return '<div class="depense-item"><span class="depense-who '+(d.who==='Fabrice'?'who-fab':'who-aym')+'">'+d.who+'</span><span class="depense-desc">'+d.desc+'</span><span class="depense-mnt">-'+fmt(d.mnt)+'</span><button class="del-btn" onclick="supprimerDepDevis('+i+')">x</button></div>';
+  }).join('');
+}
+
+function ajouterDepDevis(){
+  var desc=document.getElementById('dv-dep-desc').value.trim()||'Depense';
+  var mnt=parseFloat(document.getElementById('dv-dep-mnt').value);
+  if(!mnt||mnt<=0){alert('Entre un montant valide.');return;}
+  if(!dvWho){alert('Choisis qui avance la depense.');return;}
+  if(devisEditIndex===null){
+    alert('Sauvegarde d\'abord le devis avant d\'ajouter des depenses.');return;
+  }
+  devisList[devisEditIndex].depenses.push({desc:desc,mnt:mnt,who:dvWho});
+  sauverEnLigne().then(function(){
+    document.getElementById('dv-dep-desc').value='';document.getElementById('dv-dep-mnt').value='';
+    dvWho=null;document.getElementById('dv-who-fab').className='who-btn';document.getElementById('dv-who-aym').className='who-btn';
+    renderDepDevis();calcDevis();
+  });
+}
+
+function supprimerDepDevis(i){
+  devisList[devisEditIndex].depenses.splice(i,1);
+  sauverEnLigne().then(function(){renderDepDevis();calcDevis();});
+}
+
+function sauvegarderDevis(){
+  var client=document.getElementById('dv-client').value.trim();
+  var montant=parseFloat(document.getElementById('dv-montant').value);
+  if(!client){alert('Entre le nom du client.');return;}
+  var obj={client:client,lieu:document.getElementById('dv-lieu').value.trim(),montant:montant||0,responsable:dvResp,declare:dvDeclare,notes:document.getElementById('dv-notes').value,depenses:[]};
+  if(devisEditIndex!==null){
+    obj.depenses=devisList[devisEditIndex].depenses||[];
+    devisList[devisEditIndex]=obj;
+  } else {
+    devisList.push(obj);
+    devisEditIndex=devisList.length-1;
+    document.getElementById('dv-btn-suppr').style.display='block';
+  }
+  sauverEnLigne().then(function(){renderDevisList();alert('Devis sauvegarde !');});
+}
+
+function validerDevis(){
+  var client=document.getElementById('dv-client').value.trim();
+  var montant=parseFloat(document.getElementById('dv-montant').value)||0;
+  if(!client){alert('Entre le nom du client.');return;}
+  if(!dvResp){alert('Choisis le responsable.');return;}
+  if(!confirm('Creer le chantier pour '+client+' ?'))return;
+  chantiers.push({client:client,devis:montant,date:today(),responsable:dvResp,declare:dvDeclare,virement:false,livre:false,jours:0,notes:document.getElementById('dv-notes').value,depenses:[]});
+  if(devisEditIndex!==null) devisList.splice(devisEditIndex,1);
+  sauverEnLigne().then(function(){
+    fermerDevisModal();
+    renderDevisList();
+    alert('Chantier cree ! Pense a mettre a jour la date de demarrage dans la liste.');
+    showSection('liste');
+  });
+}
+
+function supprimerDevis(){
+  if(!confirm('Supprimer ce devis ?'))return;
+  devisList.splice(devisEditIndex,1);
+  sauverEnLigne().then(function(){fermerDevisModal();renderDevisList();});
+}
+
 function renderListe(){
   var container=document.getElementById('chantiers-list');
   var actifs=chantiers.filter(function(c){return !c.livre;});
-  actifs.sort(function(a,b){return new Date(b.date)-new new Date(a.date);});
+  actifs.sort(function(a,b){return new Date(b.date)-new Date(a.date);});
   if(!actifs.length){container.innerHTML='<div class="empty-state"><div class="icon">🏗️</div>Aucun chantier en cours.</div>';return;}
   container.innerHTML=actifs.map(function(c){
     var ri=chantiers.indexOf(c);
@@ -337,6 +568,8 @@ function renderListe(){
     var chipClass=c.responsable==='Fabrice'?'chip-fab':'chip-aym';
     var urssafVal=r.declare?('-'+fmt(r.urssaf)):'<span style="color:var(--accent);font-weight:800">EN ESPECES</span>';
     var notesHtml=c.notes&&c.notes.trim()?'<div class="notes-preview">📝 '+c.notes.trim()+'</div>':'';
+    var joursMax=r.part>0?Math.floor(r.part/OBJECTIF_MIN):0;
+    var precoHtml='<div class="preconisation-mini">📅 Maximum <b>'+joursMax+' jour'+(joursMax>1?'s':'')+'</b> de travail pour 250€ net chacun/jour</div>';
     return '<div class="card" onclick="ouvrirModal('+ri+')">' +
       (r.declare?'':'<div class="especes-badge">EN ESPECES</div>') +
       '<div class="card-header"><div><div class="client-name">'+c.client+'</div><div class="tag-date">Demarrage : '+fmtDate(c.date)+'</div></div><div class="chip '+chipClass+'">'+c.responsable+'</div></div>' +
@@ -347,9 +580,9 @@ function renderListe(){
       '<hr class="divider">' +
       '<div class="row"><label>Part Fabrice</label><span class="mono blue">'+fmt(r.recoit_fab)+'</span></div>' +
       '<div class="row"><label>Part Aymeric</label><span class="mono orange">'+fmt(r.recoit_aym)+'</span></div>' +
-      '<div class="row"><label><b>Net total</b></label><span class="mono '+(r.resultatNet>=0?'green':'red')+'"><b>'+fmt(r.resultatNet)+'</b></span></div>' +
+      '<div class="row"><label><b>Gain chacun</b></label><span class="mono '+(r.part>=0?'green':'red')+'"><b>'+fmt(r.part)+'</b></span></div>' +
       '<div class="arrow-box" style="margin-top:10px"><strong>'+r.transfert.de+'</strong> verse <strong>'+fmt(r.transfert.mnt)+'</strong> a '+r.transfert.a+'</div>' +
-      notesHtml+'</div>';
+      precoHtml+notesHtml+'</div>';
   }).join('');
 }
 
@@ -476,23 +709,18 @@ function supprimerDemande(){if(!confirm('Supprimer ?'))return;demandes.splice(de
 function renderBilan(){
   var container=document.getElementById('bilan-content');
   if(!chantiers.length){container.innerHTML='<div class="empty-state"><div class="icon">📊</div>Aucune donnee.</div>';return;}
-
-  // Solde : uniquement chantiers TERMINES et NON vires
   var soldeNonVire=0;
   chantiers.forEach(function(c){
-    if(!c.livre) return; // ignorer chantiers non termines
-    if(c.virement) return; // ignorer si virement deja fait
+    if(!c.livre||c.virement) return;
     var r=calcChantier(c);
     if(r.transfert.de==='Aymeric'&&r.transfert.a==='Fabrice') soldeNonVire+=r.transfert.mnt;
     else soldeNonVire-=r.transfert.mnt;
   });
-
   var aRegler;
   if(soldeNonVire>0.01) aRegler='<strong>Aymeric</strong> doit verser <strong>'+fmt(soldeNonVire)+'</strong> a Fabrice';
   else if(soldeNonVire<-0.01) aRegler='<strong>Fabrice</strong> doit verser <strong>'+fmt(-soldeNonVire)+'</strong> a Aymeric';
   else aRegler='Tout est regle entre vous deux';
 
-  // Tableau 6 derniers mois
   var now=new Date();
   var moisData=[];
   for(var m=5;m>=0;m--){
@@ -512,25 +740,12 @@ function renderBilan(){
       }
     });
   });
-
   var tableRows=moisData.map(function(md){
     var has=md.ca>0;
-    return '<tr'+(has?'':' style="opacity:0.35"')+'>' +
-      '<td class="mois-label">'+md.label+'</td>' +
-      '<td style="color:var(--accent)">'+fmtShort(md.ca)+'</td>' +
-      '<td style="color:var(--red)">'+fmtShort(md.urssafFab)+'</td>' +
-      '<td style="color:var(--red)">'+fmtShort(md.urssafAym)+'</td>' +
-      '<td style="color:var(--green);font-weight:700">'+fmtShort(md.gainChacun)+'</td>' +
-    '</tr>';
+    return '<tr'+(has?'':' style="opacity:0.35"')+'><td class="mois-label">'+md.label+'</td><td style="color:var(--accent)">'+fmtShort(md.ca)+'</td><td style="color:var(--red)">'+fmtShort(md.urssafFab)+'</td><td style="color:var(--red)">'+fmtShort(md.urssafAym)+'</td><td style="color:var(--green);font-weight:700">'+fmtShort(md.gainChacun)+'</td></tr>';
   }).join('');
+  var moisHtml='<div class="mois-block"><h3>6 derniers mois</h3><table class="mois-table"><thead><tr><th>Mois</th><th>CA</th><th>URSSAF Fab</th><th>URSSAF Aym</th><th>Gain chacun</th></tr></thead><tbody>'+tableRows+'</tbody></table></div>';
 
-  var moisHtml=
-    '<div class="mois-block"><h3>6 derniers mois</h3>' +
-    '<table class="mois-table"><thead><tr>' +
-    '<th>Mois</th><th>CA</th><th>URSSAF Fab</th><th>URSSAF Aym</th><th>Gain chacun</th>' +
-    '</tr></thead><tbody>'+tableRows+'</tbody></table></div>';
-
-  // Detail chantiers
   var sorted=chantiers.slice().sort(function(a,b){return new Date(b.date)-new Date(a.date);});
   var rows=sorted.map(function(c){
     var i=chantiers.indexOf(c);
@@ -540,26 +755,10 @@ function renderBilan(){
     var jours=parseInt(c.jours)||0;
     var perfHtml='';
     if(jours>0){var diff=r.part-jours*OBJECTIF_JOUR;var pj=r.part/jours;var cls=diff>=0?'perf-ok':'perf-bad';perfHtml='<div class="perf-result '+cls+'">'+(diff>=0?'BON':'INSUFFISANT')+' - '+fmt(pj)+' / jour'+(diff>=0?' (+'+fmt(diff)+')':' ('+fmt(diff)+')')+'</div>';}
-    return '<div class="card" style="cursor:default'+(c.livre?';opacity:0.6;border-style:dashed':'')+'">' +
-      (c.declare===false?'<div class="especes-badge">EN ESPECES</div>':'') +
-      (c.livre?'<div style="font-size:11px;font-weight:800;color:var(--green);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">TERMINE</div>':'') +
-      '<div class="card-header"><div><div class="client-name">'+c.client+'</div><div class="tag-date">Demarrage : '+fmtDate(c.date)+'</div></div><div class="chip '+chipClass+'">'+c.responsable+'</div></div>' +
-      '<div class="row"><label>Devis</label><span class="mono yellow">'+fmt(r.devis)+'</span></div>' +
-      '<div class="row"><label>'+(c.declare!==false?'URSSAF 24%':'EN ESPECES')+'</label><span class="mono red">'+urssafVal+'</span></div>' +
-      '<div class="row"><label>Dep. Fabrice</label><span class="mono red">-'+fmt(r.depFab)+'</span></div>' +
-      '<div class="row"><label>Dep. Aymeric</label><span class="mono red">-'+fmt(r.depAym)+'</span></div>' +
-      '<hr class="divider">' +
-      '<div class="row"><label>Gain chacun</label><span class="mono green">'+fmt(r.part)+'</span></div>' +
-      '<div class="arrow-box"><strong>'+r.transfert.de+'</strong> verse <strong>'+fmt(r.transfert.mnt)+'</strong> a '+r.transfert.a+'</div>' +
-      '<div class="perf-box"><label>Nb de jours travailles</label><div class="perf-input-row"><input type="number" min="0" value="'+(c.jours||0)+'" onchange="updateJours('+i+',this.value)" onclick="event.stopPropagation()" style="width:80px" /><span style="font-size:12px;color:var(--muted);">jours - objectif '+OBJECTIF_JOUR+' euros/jour/pers</span></div>'+perfHtml+'</div>' +
-      '<div class="check-row"><input type="checkbox" '+(c.livre?'checked':'')+' onchange="toggleLivre('+i+',this.checked)" onclick="event.stopPropagation()" /><span>Chantier termine</span></div>' +
-      '<div class="check-row"><input type="checkbox" '+(c.virement?'checked':'')+' onchange="toggleVirement('+i+',this.checked)" onclick="event.stopPropagation()" /><span>Virement effectue</span></div>' +
-    '</div>';
+    return '<div class="card" style="cursor:default'+(c.livre?';opacity:0.6;border-style:dashed':'')+'">'+(c.declare===false?'<div class="especes-badge">EN ESPECES</div>':'')+(c.livre?'<div style="font-size:11px;font-weight:800;color:var(--green);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">TERMINE</div>':'')+'<div class="card-header"><div><div class="client-name">'+c.client+'</div><div class="tag-date">Demarrage : '+fmtDate(c.date)+'</div></div><div class="chip '+chipClass+'">'+c.responsable+'</div></div><div class="row"><label>Devis</label><span class="mono yellow">'+fmt(r.devis)+'</span></div><div class="row"><label>'+(c.declare!==false?'URSSAF 24%':'EN ESPECES')+'</label><span class="mono red">'+urssafVal+'</span></div><div class="row"><label>Dep. Fabrice</label><span class="mono red">-'+fmt(r.depFab)+'</span></div><div class="row"><label>Dep. Aymeric</label><span class="mono red">-'+fmt(r.depAym)+'</span></div><hr class="divider"><div class="row"><label>Gain chacun</label><span class="mono green">'+fmt(r.part)+'</span></div><div class="arrow-box"><strong>'+r.transfert.de+'</strong> verse <strong>'+fmt(r.transfert.mnt)+'</strong> a '+r.transfert.a+'</div><div class="perf-box"><label>Nb de jours travailles</label><div class="perf-input-row"><input type="number" min="0" value="'+(c.jours||0)+'" onchange="updateJours('+i+',this.value)" onclick="event.stopPropagation()" style="width:80px" /><span style="font-size:12px;color:var(--muted);">jours - objectif '+OBJECTIF_JOUR+' euros/jour/pers</span></div>'+perfHtml+'</div><div class="check-row"><input type="checkbox" '+(c.livre?'checked':'')+' onchange="toggleLivre('+i+',this.checked)" onclick="event.stopPropagation()" /><span>Chantier termine</span></div><div class="check-row"><input type="checkbox" '+(c.virement?'checked':'')+' onchange="toggleVirement('+i+',this.checked)" onclick="event.stopPropagation()" /><span>Virement effectue</span></div></div>';
   }).join('');
 
-  container.innerHTML=
-    '<div class="arrow-box-big">A regler maintenant :<br>'+aRegler+'</div>'+
-    moisHtml+rows;
+  container.innerHTML='<div class="arrow-box-big">A regler maintenant :<br>'+aRegler+'</div>'+moisHtml+rows;
 }
 
 function exporterExcel(){
